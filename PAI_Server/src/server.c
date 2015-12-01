@@ -1,3 +1,18 @@
+/********************************************************************/
+/*																	*/
+/*							Serveur PAI								*/
+/*																	*/
+/*																	*/
+/*	Date : 01/12/2015												*/
+/*	Description : Serveur métier du projet PAI L3 MIAGE 2015.		*/
+/*	Spécification : Utilisation de sockets TCP (Reception).			*/
+/*	Developpeurs :	- MARTINIER Alexis								*/
+/*					- VAILLANT Hugo									*/
+/*					- ORTIZ Luc										*/
+/*					- FERNANDES Aurélien							*/
+/*																	*/
+/********************************************************************/
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -11,27 +26,92 @@
 #include <string.h>
 
 
+/**
+ * Structure
+ */
+struct S_InfRequest {
+	char* hostIp;
+	char* hostPort;
+	int contentLength;
+	int idInf;
+	char* xmlContent;
+} InfRequest;
+
+/**
+ * Permet de prendre connaissance de la mort d'un fils
+ *
+ * @param sig L'identifiant du signal ayant déclenché l'action (int)
+ */
 void finfils(int sig)
 {
 	printf("INFO : Reception de la mort d'un fils.\n");
 	wait();
 }
 
+/**
+ * Permet de lire ligne à ligne la requête et de remplir la structure InfRequest
+ */
+struct InfRequest readLine(char* request)
+{
+	//Recup = "";
+	//lengthRequest = strlen(request)
+	//lentgthRead = 0;
+	//Boucle sur chaque ligne (VERIF avec lentgthRead < lengthRequest)
+		//Boucle sur chaque character
+			//Recup += recupChar + lentgthRead
+			//lentgthRead ++;
+			//Verif Si recup == "post"
+				//STATE POST
+			//Verif sinon si recup == "host"
+				//STATE HOST
+			//Verif sinon ...
+				//...
+			//Verif sinon recup == "\n"
+				//fin = true
+				//BREAK
+		//Fin de boucle quand recupChar == "\n"
+
+		//SWITCH STATE
+			//CASE POST
+				//TODO : verif si post bon
+			//CASE HOST
+				//TODO : remplir structur InfRequest
+			//CASE ...
+		//FIN SWITCH
+
+		//SI fin == true
+			//BREAK
+
+		//Recup = "";
+
+	//Fin de boucle
+
+	//TODO : mettre id et xml dans la structure via lengthRead
+}
+
 
 int main(int argc, char *argv[])
 {
-	//GESTION DES SIGNAUX
+	/********************************************************************/
+	/*																	*/
+	/*						GESTION DES SIGNAUX							*/
+	/*																	*/
+	/********************************************************************/
 
 	/** struct sigaction : La structure qui permet de ne pas bloquer le père à la fin de vie de ses fils **/
 	struct sigaction a;
 	a.sa_handler = finfils;
 	a.sa_flags = SA_RESTART;
 
-	//Application de notre structure
+	//Application de la structure sigaction
 	sigaction(SIGCHLD, &a, NULL);
 
 
-	//GESTION DE L'INTERFACE
+	/********************************************************************/
+	/*																	*/
+	/*						GESTION DE L'INTERFACE						*/
+	/*																	*/
+	/********************************************************************/
 
 	/** int defaultPort : Entier qui defini le port par défaut pour la socket d'écoute **/
 	int defaultPort = 6842;
@@ -47,26 +127,31 @@ int main(int argc, char *argv[])
 		int rep = -1;
 		while (rep == -1)
 		{
-			printf("Vous n'avez pas saisi de port, voulez-vous utiliser celui par défaut ? (oui : 1 | non : 0)\n>");
+			printf("INFO : Vous n'avez pas saisi de port, voulez-vous utiliser celui par défaut ? (oui : 1 | non : 0)\n>");
 			scanf("%i", &rep);
 
 			if (rep == 1)
 				port = defaultPort;
 			else if (rep == 0)
 			{
-				printf("Arrêt de l'application.\n");
+				printf("INFO : Arrêt de l'application.\n");
 				exit(0);
 			}
 			else
 			{
-				printf("Reponse non valide.\n");
+				printf("INFO : Reponse non valide.\n");
 				rep = -1;
 			}
 		}
 	}
 
 
-	//GESTION DES SOCKETS
+	/********************************************************************/
+	/*																	*/
+	/*						GESTION DES SOCKETS							*/
+	/*																	*/
+	/********************************************************************/
+
 
 	/** struct sockaddr_in* p : Pointeur sur la structure qui contient la configuration de la socket **/
 	struct sockaddr_in p;
@@ -122,7 +207,7 @@ int main(int argc, char *argv[])
 						{
 							case 0:
 								/* PROCESSUS FILS */
-								printf("INFO : Processus fils -> lire les donées qui transitent (pid = %d)\n", getpid());
+								printf("INFO : Processus fils -> lire les donées qui transitent (pid = %d).\n", getpid());
 
 								//Ferme la socket d'écoute
 								close(id_socket_server_listen);
@@ -133,7 +218,9 @@ int main(int argc, char *argv[])
 									strcat(bufferFull, bufferReception);
 								}
 
-								printf("INFO : Read octets -> %i\n> %s\n", nbOctetRecusFull, bufferFull);
+								printf("INFO : Read octets -> %i\n> %s\n\n", nbOctetRecusFull, bufferFull);
+
+								struct readLine(buffer);
 
 								//Ferme la socket d'écoute
 								close(id_socket_server_service);
