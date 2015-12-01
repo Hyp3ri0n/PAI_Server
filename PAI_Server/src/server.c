@@ -12,7 +12,8 @@
 
 void finfils(int sig)
 {
-	while(waitpid(-1, NULL, WNOHANG) > 0) {}
+	//?//
+	while(wait()) {}
 }
 
 
@@ -70,7 +71,7 @@ int main(int argc, char *argv[])
 		p->sin_family = AF_INET;
 		p->sin_port = port;
 		p->sin_addr->s_addr = htonl(INADDR_ANY);
-		p->sin_zero[8] = 0;
+		p->sin_zero[8] = 0;//?//
 
 		if (bind(id_socket_server_listen, p, sizeof(p)) == 0)
 		{
@@ -104,12 +105,15 @@ int main(int argc, char *argv[])
 						{
 							case 0:
 								/* PROCESSUS FILS */
-								printf("Processus fils : pid = %d\n", getpid() );
-								exit(0); /* fin du processus fils */
+								printf("INFO : Processus fils -> lire les donées qui transitent (pid = %d)\n", getpid() );
+
+								//TODO : Read
+
+								exit(0); /* fin du processus fils */ //?//
 								break;
 							default:
 								/* PROCESSUS PERE */
-								printf("INFO : Père retourne dans accept (pid=%d)\n", pid );
+								printf("INFO : Processus père -> retourne dans \"accept\" (pid=%d)\n", pid );
 								break;
 						}
 					}
