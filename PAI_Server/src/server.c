@@ -103,7 +103,8 @@ int main(int argc, char *argv[])
 					int pid;
 					char bufferReception[255];
 					char bufferFull[2048];
-					int nbOctetRecus;
+					int nbOctetRecus = 0;
+					int nbOctetRecusFull = 0;
 
 					//Création du fils
 					pid = fork();
@@ -119,13 +120,13 @@ int main(int argc, char *argv[])
 								//Ferme la socket d'écoute
 								close(id_socket_server_listen);
 
-								//TODO : Read
-								while (read(id_socket_server_service, bufferReception, sizeof(bufferReception)) != 0)
+								while ((nbOctetRecus = read(id_socket_server_service, bufferReception, sizeof(bufferReception))) != 0)
 								{
+									nbOctetRecusFull = nbOctetRecus + nbOctetRecusFull;
 									strcat(bufferFull, bufferReception);
 								}
 
-								printf("INFO : Read -> %s", bufferFull);
+								printf("INFO : Read octets -> %i\n> %s\n", nbOctetRecusFull, bufferFull);
 
 								//Ferme la socket d'écoute
 								close(id_socket_server_service);

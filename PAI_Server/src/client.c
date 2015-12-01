@@ -43,14 +43,14 @@ int main(int argc, char* argv[])
 				printf("SUCCESS : Connect socket d'émission.\n");
 
 				//TODO : Write
-				char* bufferEnvoi = "Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test !FIN DE MESSAGE";
+				char* bufferEnvoi = "Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Saluut, test ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluuttest ! Salut, ceci est un test ! Saluutceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test ! Salut, ceci est un test !FIN DE MESSAGE";
 
 				int len = strlen(bufferEnvoi);
 				int len_sent = 0;
 				while (len_sent < len)
 				{
 					len_sent = len_sent + write(id_socket_client_emmet, bufferEnvoi + len_sent, 255);
-					printf("INFO : Write -> %i\n", len_sent);
+					printf("INFO : Write octets -> %i.\n", len_sent);
 				}
 			}
 			else
