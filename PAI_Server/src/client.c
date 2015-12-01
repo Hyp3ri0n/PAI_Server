@@ -17,11 +17,12 @@ int main(int argc, char* argv[])
 		char* server = argv[4];
 		/** struct hostent* : ... **/
 
+		//Quand sur même machine pour eviter de réécrire le nom de la machine
+		//char hostname[1024];
+		//hostname[1023] = '\0';
+		//gethostname(hostname, 1023);
 
-		char hostname[1024];
-		hostname[1023] = '\0';
-		gethostname(hostname, 1023);
-		struct hostent* hostinfos = gethostbyname(hostname);
+		struct hostent* hostinfos = gethostbyname(server);
 		printf("Hostname FULL: %s\n", hostinfos->h_name);
 
 		/** struct sockaddr_in* p : Pointeur sur la structure qui contient la configuration de la socket **/

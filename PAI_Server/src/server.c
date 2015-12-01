@@ -90,6 +90,13 @@ int main(int argc, char *argv[])
 		{
 			printf("SUCCESS : Bind socket écoute.\n");
 
+			//Pour savoir le nom de la machine
+			char hostname[1024];
+			hostname[1023] = '\0';
+			gethostname(hostname, 1023);
+			struct hostent* hostinfos = gethostbyname(hostname);
+			printf("INFO : Hostname -> %s\n", hostinfos->h_name);
+
 			if (listen(id_socket_server_listen, nbMaxCo) == 0)
 			{
 				printf("SUCCESS : Listen socket écoute.\n");
