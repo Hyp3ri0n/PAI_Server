@@ -8,25 +8,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <string.h>
 
 
 void finfils(int sig)
 {
-	//?//
-	while(wait()) {}
+	printf("INFO : Reception de la mort d'un fils.\n");
+	wait();
 }
 
 
 int main(int argc, char *argv[])
 {
+	//GESTION DES SIGNAUX
+
+	/** struct sigaction : La structure qui permet de ne pas bloquer le père à la fin de vie de ses fils **/
+	struct sigaction a;
+	a.sa_handler = finfils;
+	a.sa_flags = SA_RESTART;
+
+	//Application de notre structure
+	sigaction(SIGCHLD, &a, NULL);
+
+
+	//GESTION DE L'INTERFACE
+
 	/** int defaultPort : Entier qui defini le port par défaut pour la socket d'écoute **/
 	int defaultPort = 6842;
 	/** int port : Entier qui defini le port pour la socket d'écoute **/
 	int port;
 	/** char** ip : Chaine de caractères définissant l'adresse ip du serveur **/
-	char** ip = "127.0.0.1";
-
-	//GESTION DE L'INTERFACE
+	char* ip = "127.0.0.1";
 
 	if (argc == 3 && strcmp(argv[1], "-p") == 0)
 		port = atoi(argv[2]);
@@ -57,7 +69,7 @@ int main(int argc, char *argv[])
 	//GESTION DES SOCKETS
 
 	/** struct sockaddr_in* p : Pointeur sur la structure qui contient la configuration de la socket **/
-	struct sockaddr_in* p;
+	struct sockaddr_in p;
 	/** int nbMaxCo : Entier qui défini le nombre maximal de connections clients simultanées sur la même socket **/
 	int nbMaxCo = 10;
 	/** int id_socket_server_listen : Entier qui défini l'identifiant de la socket d'écoute **/
@@ -66,35 +78,32 @@ int main(int argc, char *argv[])
 
 	if (id_socket_server_listen != -1)
 	{
-		printf("SUCCESS : Création socket écoute.\n");
+		printf("SUCCESS : Création socket écoute. port : %i\n", port);
 
-		p->sin_family = AF_INET;
-		p->sin_port = port;
-		p->sin_addr->s_addr = htonl(INADDR_ANY);
-		p->sin_zero[8] = 0;//?//
+		p.sin_family = AF_INET;
+		p.sin_port = htons(port);
+		p.sin_addr.s_addr = htonl(INADDR_ANY);
 
-		if (bind(id_socket_server_listen, p, sizeof(p)) == 0)
+		printf("SUCCESS : Assign socket écoute3.\n");
+
+		if (bind(id_socket_server_listen, (struct sockaddr *)&p, sizeof(struct sockaddr_in)) == 0)
 		{
 			printf("SUCCESS : Bind socket écoute.\n");
 
-			while (listen(id_socket_server_listen, nbMaxCo) == 0)
+			if (listen(id_socket_server_listen, nbMaxCo) == 0)
 			{
 				printf("SUCCESS : Listen socket écoute.\n");
 
-				int id_socket_server_service = accept(id_socket_server_listen, p, sizeof(p));
+				int sizeofSockaddr_in = sizeof(struct sockaddr_in);
+				int id_socket_server_service = accept(id_socket_server_listen, (struct sockaddr *)&p, &sizeofSockaddr_in);
 
-				if(id_socket_server_service != -1)
+				while (id_socket_server_service != -1)
 				{
 					/** int pid : PID du processus fils **/
 					int pid;
-
-					/** struct sigaction : La structure qui permet de ne pas bloquer le père à la fin de vie de ses fils **/
-					struct sigaction a;
-					a.sa_handler = finfils;
-					a.sa_flags = SA_RESTART;
-
-					//Application de notre structure
-					sigaction(SIGCHLD, &a, NULL);
+					char bufferReception[255];
+					char bufferFull[2048];
+					int nbOctetRecus;
 
 					//Création du fils
 					pid = fork();
@@ -105,26 +114,43 @@ int main(int argc, char *argv[])
 						{
 							case 0:
 								/* PROCESSUS FILS */
-								printf("INFO : Processus fils -> lire les donées qui transitent (pid = %d)\n", getpid() );
+								printf("INFO : Processus fils -> lire les donées qui transitent (pid = %d)\n", getpid());
+
+								//Ferme la socket d'écoute
+								close(id_socket_server_listen);
 
 								//TODO : Read
+								while (read(id_socket_server_service, bufferReception, sizeof(bufferReception)) != 0)
+								{
+									strcat(bufferFull, bufferReception);
+								}
 
-								exit(0); /* fin du processus fils */ //?//
+								printf("INFO : Read -> %s", bufferFull);
+
+								//Ferme la socket d'écoute
+								close(id_socket_server_service);
+
+								exit(0); /* fin du processus fils */ //Quand interaction finie, dans une fonction, recup la requete, contacter gg, traitement
 								break;
 							default:
 								/* PROCESSUS PERE */
-								printf("INFO : Processus père -> retourne dans \"accept\" (pid=%d)\n", pid );
+								//Ferme la socket de service
+								close(id_socket_server_service);
+								printf("INFO : Processus père -> retourne dans \"accept\" (pid=%d)\n", pid);
 								break;
 						}
 					}
 					else
 						perror("ERROR : Fork sur père.\n");
+
+					//"Pourquoi pas" - Hugo
+					id_socket_server_service = accept(id_socket_server_listen, (struct sockaddr *)&p, &sizeofSockaddr_in);
 				}
-				else
-					perror("ERROR : Accept socket écoute.\n");
+				/*else
+					perror("ERROR : Accept socket écoute.\n");*/
 			}
-			/*else
-				perror("ERROR : Listen socket écoute.\n");*/
+			else
+				perror("ERROR : Listen socket écoute.\n");
 		}
 		else
 			perror("ERROR : Bind socket écoute.\n");
