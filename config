@@ -1,0 +1,7 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = true
+	logallrefupdates = false
+[remote "origin"]
+	url = https://github.com/Hyp3ri0n/PAI_Server.git
