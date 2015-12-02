@@ -115,11 +115,10 @@ void readLine(char* request, InfRequest* r)
 					break;
 
 				case LENGTH:
-					printf("INFO : Request -> LENGHT : %s.\n", recup);
+					printf("INFO : Request -> CONTENTLENGTH : %s.\n", recup);
 
 					lengthContent = atoi(recup + 16);
 					r->contentLength = lengthContent;
-					printf("INFO : r -> ConstentLength : %i.\n", r->contentLength);
 
 					break;
 
@@ -139,27 +138,23 @@ void readLine(char* request, InfRequest* r)
 
 
 	char xmlContent[r->contentLength];
-	printf("PROB 1\n");
 	char id[3];
-	printf("PROB 2\n");
 	char* xml = "&xml=";
-	printf("PROB 3\n");
 	char* temp = strstr(request, xml);
-	printf("PROB 4\n");
 
 	//GESTION ID + XML
-
 	int i;
 	for (i = 0; i < 3; i++)
 		id[i] = request[lengthRead + i];
 
-	printf("PROB 5 id : %s - xml : %s\n", id, temp + 5);
-
 	char* test = temp + 5;
-	strcpy(xml, test);
-	printf("PROB 6\n");
-	printf("INFO : r -> id : %s.\n", id);
-	printf("INFO : r -> xml : %s.\n", xml);
+	strcpy(xmlContent, test);
+
+	r->idInf = id;
+	r->xmlContent = xmlContent;
+
+	printf("INFO : Request -> IDINF : %s.\n", r->idInf);
+	printf("INFO : Request -> XMLCONTENT : %s.\n", r->xmlContent);
 
 
 	if (requestOK == 0)
@@ -299,6 +294,12 @@ int main(int argc, char *argv[])
 
 								InfRequest request;
 								readLine(bufferFull, &request);
+
+								printf("INFO : Struct InfRequest -> CONTENTLENGTH : %i.\n", request.contentLength);
+								printf("INFO : Struct InfRequest -> IDINF : %s.\n", request.idInf);
+								printf("INFO : Struct InfRequest -> XMLCONTENT : %s.\n", request.xmlContent);
+
+
 
 								//Ferme la socket d'écoute
 								close(id_socket_server_service);
