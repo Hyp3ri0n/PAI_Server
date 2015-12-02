@@ -214,7 +214,6 @@ int main(int argc, char *argv[])
 										printf("LENGHT : %s", buffer);
 										length_request = atoi(buffer + 16);
 									}
-									printf("SORTI avec legnth req -> %i\n", length_request);
 								}
 
 								request_body = malloc(length_request);
@@ -244,9 +243,11 @@ int main(int argc, char *argv[])
 
 
 								//TODO : Something
+								int a;
+								char* request_good = curl_easy_unescape(curl_easy_init(), xmlContent, 0, a);
+								curl_free(request_good);
 
-
-
+								//TODO : enregistrer dans un fichier
 
 
 								//free
