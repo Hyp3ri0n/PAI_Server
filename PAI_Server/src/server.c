@@ -27,23 +27,11 @@
 #include <curl/curl.h>
 
 
-#define NOTHING 0
-#define POST 1
-#define LENGTH 2
-#define CONTENT 3
 
-
-
-/**
- * Structure
- */
-/*struct S_InfRequest {
-	int contentLength;
-	char* idInf;
-	char* xmlContent;
-};
-typedef struct S_InfRequest InfRequest;*/
-
+//Variables globales
+char buffer[1024] = "";
+int length_request = 0;
+char* request_body;
 
 
 
@@ -58,117 +46,10 @@ void finfils(int sig)
 	wait();
 }
 
+
 /**
  * Permet de lire ligne à ligne la requête et de remplir la structure InfRequest
  */
-/*void readLine(char* request, InfRequest* r)
-{
-	char recup[255];
-	int lengthRequest = strlen(request);
-	int lengthContent = 0;
-	int lengthRead = 0;
-	int finLigne = 1;
-	int requestOK = 0;
-	int indiceLigne;
-	int state;
-
-	//GESTION ENTETE
-	while(lengthRequest > lengthRead)
-	{
-		if(request[lengthRead] != '\n')
-		{
-			if(finLigne == 1)
-			{
-				indiceLigne = 0;
-				finLigne = 0;
-				memset(recup, 0, sizeof(recup));
-				state = NOTHING;
-			}
-
-			recup[indiceLigne] = request[lengthRead];
-
-			if(state == NOTHING)
-			{
-				if(strcmp(recup,"POST") == 0)
-				{
-					state = POST;
-				}
-				else if(strcmp(recup,"Content-Length") == 0)
-				{
-					state = LENGTH;
-				}
-				else if(strcmp(recup,"id") == 0)
-				{
-					state = CONTENT;
-				}
-			}
-		}
-		else
-		{
-			finLigne = 1;
-
-			switch(state)
-			{
-				case POST:
-					printf("INFO : Request -> POST : %s.\n", recup);
-					if(strcmp(recup,"POST /INFIRMIERE HTTP/1.1"))
-						requestOK = 1;
-					break;
-
-				case LENGTH:
-					printf("INFO : Request -> CONTENTLENGTH : %s.\n", recup);
-
-					lengthContent = atoi(recup + 16);
-					r->contentLength = lengthContent;
-
-					break;
-
-				default:
-					break;
-			}
-		}
-		lengthRead++;
-		indiceLigne++;
-
-		if (state == CONTENT)
-		{
-			lengthRead++; //Pour sauter le "=" dans "id=..."
-			break;
-		}
-	}
-
-
-	char xmlContent[r->contentLength];
-	char id[3];
-	char* xml = "&xml=";
-	char* temp = strstr(request, xml);
-
-	//GESTION ID + XML
-	int i;
-	for (i = 0; i < 3; i++)
-		id[i] = request[lengthRead + i];
-
-	char* test = temp + 5;
-	strcpy(xmlContent, test);
-
-	r->idInf = id;
-	r->xmlContent = xmlContent;
-
-	printf("INFO : Request -> IDINF : %s.\n", r->idInf);
-	printf("INFO : Request -> XMLCONTENT : %s\n\n", r->xmlContent);
-
-
-	if (requestOK == 0)
-		r = NULL;
-}*/
-
-
-char buffer[1024] = "";
-int length_request = 0;
-char* request_body;
-char* xmlContent;
-char id_infirmiere[3];
-
 void readLine(int id_socket)
 {
 	memset(buffer, 0, sizeof(buffer));
@@ -195,51 +76,6 @@ void readLine(int id_socket)
 
 	printf("FIN TRAITEMENT (ligne)\n");
 }
-
-
-void parseRequest()
-{
-
-	char* xml = "&xml=";
-	char* temp = strstr(request_body, xml);
-
-	//GESTION ID + XML
-	int i;
-	for (i = 0; i < 3; i++)
-		id_infirmiere[i] = request_body[3 + i];
-
-	char* test = temp + 5;
-	strcpy(xmlContent, test);
-
-
-	printf("ID INFIRMIERE : %s\nXML : %s\n", id_infirmiere, xmlContent);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 int main(int argc, char *argv[])
@@ -345,12 +181,10 @@ int main(int argc, char *argv[])
 				{
 					/** int pid : PID du processus fils **/
 					int pid;
-					int tailleBufferReception = 255;
-					int tailleBufferFull = 2048;
-					char* bufferReception = (char*)malloc(tailleBufferReception);
-					char* bufferFull = (char*)malloc(tailleBufferFull);
-					int nbOctetRecus = 0;
-					int nbOctetRecusFull = 0;
+
+					//Variables SUPER UTILES
+					char* xmlContent;
+					char id_infirmiere[3];
 
 					//Création du fils
 					pid = fork();
@@ -366,22 +200,6 @@ int main(int argc, char *argv[])
 								//Ferme la socket d'écoute
 								close(id_socket_server_listen);
 
-								/*while ((nbOctetRecus = read(id_socket_server_service, bufferReception, sizeof(bufferReception))) != 0)
-								{
-									nbOctetRecusFull = nbOctetRecus + nbOctetRecusFull;
-									strcat(bufferFull, bufferReception);
-
-									if ((strlen(bufferFull) + tailleBufferReception) > tailleBufferFull)
-									{
-										void* tempBuffer = (char *) realloc(bufferFull, ((int)strlen(bufferFull) + tailleBufferFull));
-
-										if (tempBuffer != NULL)
-											bufferFull = tempBuffer;
-										else
-											free(tempBuffer);
-
-									}
-								}*/
 								int length_request = 0; //TODO récuperer la taille depuis HEADER
 								int length_read = 0; // incrémenté par READ
 
@@ -423,26 +241,17 @@ int main(int argc, char *argv[])
 
 								printf("ID INFIRMIERE : %s\nXML : %s\n", id_infirmiere, xmlContent);
 
-								//parseRequest();
 
 
-								/*printf("INFO : Read octets -> %i\n> %s\n\n", nbOctetRecusFull, bufferFull);
-
-								fflush(stdout);
+								//TODO : Something
 
 
-								//Traitement de la requête
-								InfRequest request;
-								readLine(bufferFull, &request);
-
-								printf("INFO : Struct InfRequest -> CONTENTLENGTH : %i.\n", request.contentLength);
-								printf("INFO : Struct InfRequest -> IDINF : %s.\n", request.idInf);
-								printf("INFO : Struct InfRequest -> XMLCONTENT : %s\n\n", request.xmlContent);*/
 
 
-								//free buffer
-								/*free(bufferFull);
-								free(bufferReception);*/
+
+								//free
+								free(request_body);
+								free(xmlContent);
 
 
 								//Ferme la socket d'écoute
