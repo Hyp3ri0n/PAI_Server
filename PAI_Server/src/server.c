@@ -26,16 +26,28 @@
 #include <string.h>
 
 
+#define NOTHING 0
+#define POST 1
+#define HOST 2
+#define LENGTH 3
+#define CONTENT 4
+
+
+
 /**
  * Structure
  */
 struct S_InfRequest {
 	char* hostIp;
-	char* hostPort;
+	int hostPort;
 	int contentLength;
 	int idInf;
 	char* xmlContent;
-} InfRequest;
+};
+typedef struct S_InfRequest InfRequest;
+
+
+
 
 /**
  * Permet de prendre connaissance de la mort d'un fils
@@ -51,42 +63,128 @@ void finfils(int sig)
 /**
  * Permet de lire ligne à ligne la requête et de remplir la structure InfRequest
  */
-struct InfRequest readLine(char* request)
+void readLine(char* request, InfRequest* r)
 {
-	//Recup = "";
-	//lengthRequest = strlen(request)
-	//lentgthRead = 0;
-	//Boucle sur chaque ligne (VERIF avec lentgthRead < lengthRequest)
-		//Boucle sur chaque character
-			//Recup += recupChar + lentgthRead
-			//lentgthRead ++;
-			//Verif Si recup == "post"
-				//STATE POST
-			//Verif sinon si recup == "host"
-				//STATE HOST
-			//Verif sinon ...
-				//...
-			//Verif sinon recup == "\n"
-				//fin = true
-				//BREAK
-		//Fin de boucle quand recupChar == "\n"
+	char* recup;
+	int lengthRequest = strlen(request);
+	int lengthRead = 0;
+	int finLigne = 1;
+	int requestOK = 0;
+	int i;
+	int indiceLigne;
+	char* pointeurTemp;
+	char* portHost[4];
+	char* lengthNumber, ip;
+	int state;
 
-		//SWITCH STATE
-			//CASE POST
-				//TODO : verif si post bon
-			//CASE HOST
-				//TODO : remplir structur InfRequest
-			//CASE ...
-		//FIN SWITCH
+	while(lengthRequest > lengthRead)
+	{
+		if(request[lengthRead] != '\n')
+		{
+			if(finLigne == 1)
+			{
+				indiceLigne = 0;
+				finLigne = 0;
+				recup = malloc(sizeof(char)*request[lengthRead] );
+				state = NOTHING;
+			}
+			else
+			{
+				pointeurTemp = realloc(recup, sizeof(recup) + sizeof(char*));
 
-		//SI fin == true
-			//BREAK
+				if (pointeurTemp != NULL)
+					recup = pointeurTemp;
+				else
+					free(pointeurTemp);
+			}
 
-		//Recup = "";
+			recup[indiceLigne] = request[lengthRead];
+			if(state == NOTHING)
+			{
+				if(strcmp(recup,"POST") == 0)
+				{ //POST /INFIRMIERE HTTP/1.1
+					state = POST;
+				}
+				else if(strcmp(recup,"Host") == 0)
+				{
+					state = HOST;
+				}
+				else if(strcmp(recup,"Content-Length") == 0)
+				{
+					state = LENGTH;
+				}
+				else if(strcmp(recup,"id") == 0)
+				{
+					state = CONTENT;
+				}
+			}
+		}
+		else
+		{
+			printf("INFO : Request -> EOL.\n");
+			//fflush(stdout);
+			finLigne = 1;
+			switch(state)
+			{
+				case POST:
+					/*if(strcmp(recup,"POST /INFIRMIERE HTTP/1.1"))
+						requestOK = 1;*/
+					printf("INFO : Request -> POST : %s.\n", recup);
+					break;
 
-	//Fin de boucle
+				case HOST:
+					/*//Récup port
+					for (i = 0; i < 4; i++)
+					{
+						portHost[i] = recup[(sizeof(recup)+(i-4))];
+						//recup[(sizeof(recup)-1)] = '\0';
+					}
+					//On enlève le ':'
+					//recup[(sizeof(recup)-5)] = '\0';
+					infos.hostPort = atoi(portHost);
 
-	//TODO : mettre id et xml dans la structure via lengthRead
+					//Recup IP
+					ip = malloc((sizeof(recup) - 11));
+					for (i = 7; i < sizeof(recup); i++)
+					{
+						ip[i-7] = recup[i];
+					}
+					infos.hostIp = recup;*/
+					printf("INFO : Request -> HOST : %s.\n", recup);
+					break;
+
+				case LENGTH:
+					/*lengthNumber = malloc((sizeof(recup)-16));
+					for (i = 17; i < sizeof(recup); i++)
+					{
+						lengthNumber[i-17] = recup[i];
+					}
+					info.contentLength = atoi(lengthNumber);*/
+					printf("INFO : Request -> LENGHT : %s.\n", recup);
+					break;
+
+				case CONTENT:
+					//infos.xmlContent = recup;
+					//infos.idInf = recup;
+					printf("INFO : Request -> CONTENT : %s.\n", recup);
+					break;
+
+				default:
+					break;
+			}
+
+			recup = "";
+			free(recup);
+			state = NOTHING;
+		}
+		lengthRead++;
+		indiceLigne++;
+	}
+
+
+
+	if (requestOK == 0)
+		r = NULL;
 }
 
 
@@ -220,7 +318,8 @@ int main(int argc, char *argv[])
 
 								printf("INFO : Read octets -> %i\n> %s\n\n", nbOctetRecusFull, bufferFull);
 
-								struct readLine(buffer);
+								InfRequest* request;
+								readLine(bufferFull, request);
 
 								//Ferme la socket d'écoute
 								close(id_socket_server_service);
