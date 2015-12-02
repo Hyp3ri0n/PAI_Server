@@ -65,7 +65,7 @@ void finfils(int sig)
  */
 void readLine(char* request, InfRequest* r)
 {
-	char* recup;
+	char recup[255];
 	int lengthRequest = strlen(request);
 	int lengthRead = 0;
 	int finLigne = 1;
@@ -73,10 +73,11 @@ void readLine(char* request, InfRequest* r)
 	int i;
 	int indiceLigne;
 	char* pointeurTemp;
-	char* portHost[4];
+	char portHost[4];
 	char* lengthNumber, ip;
 	int state;
 
+	//GESTION ENTETE
 	while(lengthRequest > lengthRead)
 	{
 		if(request[lengthRead] != '\n')
@@ -85,24 +86,16 @@ void readLine(char* request, InfRequest* r)
 			{
 				indiceLigne = 0;
 				finLigne = 0;
-				recup = malloc(sizeof(char)*request[lengthRead] );
+				memset(recup, 0, sizeof(recup));
 				state = NOTHING;
-			}
-			else
-			{
-				pointeurTemp = realloc(recup, sizeof(recup) + sizeof(char*));
-
-				if (pointeurTemp != NULL)
-					recup = pointeurTemp;
-				else
-					free(pointeurTemp);
 			}
 
 			recup[indiceLigne] = request[lengthRead];
+
 			if(state == NOTHING)
 			{
 				if(strcmp(recup,"POST") == 0)
-				{ //POST /INFIRMIERE HTTP/1.1
+				{
 					state = POST;
 				}
 				else if(strcmp(recup,"Host") == 0)
@@ -121,67 +114,83 @@ void readLine(char* request, InfRequest* r)
 		}
 		else
 		{
-			printf("INFO : Request -> EOL.\n");
-			//fflush(stdout);
 			finLigne = 1;
+
 			switch(state)
 			{
 				case POST:
-					/*if(strcmp(recup,"POST /INFIRMIERE HTTP/1.1"))
-						requestOK = 1;*/
 					printf("INFO : Request -> POST : %s.\n", recup);
+					if(strcmp(recup,"POST /INFIRMIERE HTTP/1.1"))
+						requestOK = 1;
 					break;
 
 				case HOST:
-					/*//Récup port
-					for (i = 0; i < 4; i++)
-					{
-						portHost[i] = recup[(sizeof(recup)+(i-4))];
-						//recup[(sizeof(recup)-1)] = '\0';
-					}
-					//On enlève le ':'
-					//recup[(sizeof(recup)-5)] = '\0';
-					infos.hostPort = atoi(portHost);
-
-					//Recup IP
-					ip = malloc((sizeof(recup) - 11));
-					for (i = 7; i < sizeof(recup); i++)
-					{
-						ip[i-7] = recup[i];
-					}
-					infos.hostIp = recup;*/
 					printf("INFO : Request -> HOST : %s.\n", recup);
+
+					/*int deuxPoints = 0;
+					char* dp = ":";
+					char test[1];
+					for (i = 6; i < strlen(recup); i++)
+					{
+
+						test[0] = recup[i];
+						if (strcmp(test, dp) == 0)
+						{
+							deuxPoints = 1;
+							i++;
+						}
+
+						if (deuxPoints == 1)
+						{
+							//port
+							test[0] = recup[i];
+							strcat(portHost, test);
+						}
+						else
+						{
+							//Adresse ip
+							test[0] = recup[i];
+							strcat(r->hostIp, test);
+						}
+					}
+
+					r->hostPort = atoi(portHost);
+
+					printf("INFO : r -> HOSTIP : %s.\n", r->hostIp);
+					printf("INFO : r -> HOSTPORT : %d.\n", r->hostPort);*/
+
 					break;
 
 				case LENGTH:
+					printf("INFO : Request -> LENGHT : %s.\n", recup);
+
 					/*lengthNumber = malloc((sizeof(recup)-16));
 					for (i = 17; i < sizeof(recup); i++)
 					{
 						lengthNumber[i-17] = recup[i];
 					}
 					info.contentLength = atoi(lengthNumber);*/
-					printf("INFO : Request -> LENGHT : %s.\n", recup);
-					break;
-
-				case CONTENT:
-					//infos.xmlContent = recup;
-					//infos.idInf = recup;
-					printf("INFO : Request -> CONTENT : %s.\n", recup);
 					break;
 
 				default:
 					break;
 			}
-
-			recup = "";
-			free(recup);
-			state = NOTHING;
 		}
 		lengthRead++;
 		indiceLigne++;
+
+		if (state == CONTENT)
+			break;
 	}
 
 
+	char xmlContent[r->contentLength];
+
+	//GESTION ID + XML
+	while (lengthRequest > lengthRead)
+	{
+		//Gestion du xml avec malloc et realloc ?
+	}
 
 	if (requestOK == 0)
 		r = NULL;
