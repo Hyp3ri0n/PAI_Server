@@ -70,6 +70,7 @@ int main(int argc, char *argv[]) {
                 std::cout << std::endl;
                 std::cout << std::endl;
                 std::cout << "La requête HTTP est: " << dataBaseParser.getGoogleHttpRequest(filename, idInt);
+
                 break;
 
             case 3: // créer un tableau c++ à partir du fichier XML renvoyé par GoogleMap

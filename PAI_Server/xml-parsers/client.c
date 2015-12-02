@@ -89,8 +89,8 @@ int main(int argc, char* argv[])
 			printf("SUCCESS : Connect socket d'émission.\n");
 
 			//TODO : Buffer à remplir avec la requête
-			char* req = getGoogleHttpRequest("../data/cabinet.xml", 001);
-			char* bufferEnvoi = "GET\n" + req;
+			char* req = getGoogleHttpRequest("../data/cabinet.xml", 001); // on chope la requette GG
+			char* bufferEnvoi = "GET\n" + req + "HTTP/1.1\nAccept: text/html, application/xhtml+xml,application/xml\nAccept-language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3-us";
 
 			//Gestion de l'envoi
 			int len = strlen(bufferEnvoi);
@@ -103,7 +103,6 @@ int main(int argc, char* argv[])
 
 				len_sent = len_sent + write(id_socket_client_emmet, bufferEnvoi + len_sent, taille);
 				printf("INFO : Write octets -> %i.\n", len_sent);
-				fflush(stdout);
 			}
 		}
 		else
