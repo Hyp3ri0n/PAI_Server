@@ -383,6 +383,21 @@ int main(int argc, char *argv[])
 									printf("REQUEST BODY -> %s\n", request_body);
 								}
 
+								char xmlContent[length_request];
+								char id[3];
+								char* xml = "&xml=";
+								char* temp = strstr(request_body, xml);
+
+								//GESTION ID + XML
+								int i;
+								for (i = 0; i < 3; i++)
+									id[i] = request_body[3 + i];
+
+								char* test = temp + 5;
+								strcpy(xmlContent, test);
+
+								printf("ID INFIRMIERE : %i\nXML : %s\n", id, xmlContent);
+
 								/*printf("INFO : Read octets -> %i\n> %s\n\n", nbOctetRecusFull, bufferFull);
 
 								fflush(stdout);
