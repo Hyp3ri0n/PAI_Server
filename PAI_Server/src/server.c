@@ -28,9 +28,8 @@
 
 #define NOTHING 0
 #define POST 1
-#define HOST 2
-#define LENGTH 3
-#define CONTENT 4
+#define LENGTH 2
+#define CONTENT 3
 
 
 
@@ -38,10 +37,8 @@
  * Structure
  */
 struct S_InfRequest {
-	char* hostIp;
-	int hostPort;
 	int contentLength;
-	int idInf;
+	char* idInf;
 	char* xmlContent;
 };
 typedef struct S_InfRequest InfRequest;
@@ -67,14 +64,11 @@ void readLine(char* request, InfRequest* r)
 {
 	char recup[255];
 	int lengthRequest = strlen(request);
+	int lengthContent = 0;
 	int lengthRead = 0;
 	int finLigne = 1;
 	int requestOK = 0;
-	int i;
 	int indiceLigne;
-	char* pointeurTemp;
-	char portHost[4];
-	char* lengthNumber, ip;
 	int state;
 
 	//GESTION ENTETE
@@ -98,10 +92,6 @@ void readLine(char* request, InfRequest* r)
 				{
 					state = POST;
 				}
-				else if(strcmp(recup,"Host") == 0)
-				{
-					state = HOST;
-				}
 				else if(strcmp(recup,"Content-Length") == 0)
 				{
 					state = LENGTH;
@@ -124,55 +114,13 @@ void readLine(char* request, InfRequest* r)
 						requestOK = 1;
 					break;
 
-				case HOST:
-					printf("INFO : Request -> HOST : %s (len : %i).\n", recup, strlen(recup));
-
-					/*int deuxPoints = 0;
-					char dp[1] = ":";
-					char test[1];
-					for (i = 6; i < strlen(recup); i++)
-					{
-						printf("Début for");
-
-						test[0] = recup[i];
-						if (strcmp(test, dp) == 0)
-						{
-							deuxPoints = 1;
-							i++;
-						}
-
-						if (deuxPoints == 1)
-						{
-							//port
-							test[0] = recup[i];
-							strcat(portHost, test);
-						}
-						else
-						{
-							//Adresse ip
-							test[0] = recup[i];
-							strcat(r->hostIp, test);
-						}
-					}*/
-
-					printf("Avant affectation struct hostPort");
-
-					r->hostPort = atoi(portHost);
-
-					printf("INFO : r -> HOSTIP : %s.\n", r->hostIp);
-					printf("INFO : r -> HOSTPORT : %d.\n", r->hostPort);
-
-					break;
-
 				case LENGTH:
 					printf("INFO : Request -> LENGHT : %s.\n", recup);
 
-					/*lengthNumber = malloc((sizeof(recup)-16));
-					for (i = 17; i < sizeof(recup); i++)
-					{
-						lengthNumber[i-17] = recup[i];
-					}
-					info.contentLength = atoi(lengthNumber);*/
+					lengthContent = atoi(recup + 16);
+					r->contentLength = lengthContent;
+					printf("INFO : r -> ConstentLength : %i.\n", r->contentLength);
+
 					break;
 
 				default:
@@ -183,17 +131,36 @@ void readLine(char* request, InfRequest* r)
 		indiceLigne++;
 
 		if (state == CONTENT)
+		{
+			lengthRead++; //Pour sauter le "=" dans "id=..."
 			break;
+		}
 	}
 
 
 	char xmlContent[r->contentLength];
+	printf("PROB 1\n");
+	char id[3];
+	printf("PROB 2\n");
+	char* xml = "&xml=";
+	printf("PROB 3\n");
+	char* temp = strstr(request, xml);
+	printf("PROB 4\n");
 
 	//GESTION ID + XML
-	while (lengthRequest > lengthRead)
-	{
-		//Gestion du xml avec malloc et realloc ?
-	}
+
+	int i;
+	for (i = 0; i < 3; i++)
+		id[i] = request[lengthRead + i];
+
+	printf("PROB 5 id : %s - xml : %s\n", id, temp + 5);
+
+	char* test = temp + 5;
+	strcpy(xml, test);
+	printf("PROB 6\n");
+	printf("INFO : r -> id : %s.\n", id);
+	printf("INFO : r -> xml : %s.\n", xml);
+
 
 	if (requestOK == 0)
 		r = NULL;
@@ -330,8 +297,8 @@ int main(int argc, char *argv[])
 
 								printf("INFO : Read octets -> %i\n> %s\n\n", nbOctetRecusFull, bufferFull);
 
-								InfRequest* request;
-								readLine(bufferFull, request);
+								InfRequest request;
+								readLine(bufferFull, &request);
 
 								//Ferme la socket d'écoute
 								close(id_socket_server_service);
