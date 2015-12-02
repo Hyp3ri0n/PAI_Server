@@ -125,13 +125,14 @@ void readLine(char* request, InfRequest* r)
 					break;
 
 				case HOST:
-					printf("INFO : Request -> HOST : %s.\n", recup);
+					printf("INFO : Request -> HOST : %s (len : %i).\n", recup, strlen(recup));
 
 					/*int deuxPoints = 0;
-					char* dp = ":";
+					char dp[1] = ":";
 					char test[1];
 					for (i = 6; i < strlen(recup); i++)
 					{
+						printf("Début for");
 
 						test[0] = recup[i];
 						if (strcmp(test, dp) == 0)
@@ -152,12 +153,14 @@ void readLine(char* request, InfRequest* r)
 							test[0] = recup[i];
 							strcat(r->hostIp, test);
 						}
-					}
+					}*/
+
+					printf("Avant affectation struct hostPort");
 
 					r->hostPort = atoi(portHost);
 
 					printf("INFO : r -> HOSTIP : %s.\n", r->hostIp);
-					printf("INFO : r -> HOSTPORT : %d.\n", r->hostPort);*/
+					printf("INFO : r -> HOSTPORT : %d.\n", r->hostPort);
 
 					break;
 
