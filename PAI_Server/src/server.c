@@ -293,10 +293,12 @@ int main(int argc, char *argv[])
 
 									if ((strlen(bufferFull) + tailleBufferReception) > tailleBufferFull)
 									{
-										void* tempBuffer = (char *) realloc(bufferFull, sizeof(bufferFull) + tailleBufferFull);
+										void* tempBuffer = (char *) realloc(bufferFull, ((int)strlen(bufferFull) + tailleBufferFull));
 
 										if (tempBuffer != NULL)
 											bufferFull = tempBuffer;
+										else
+											free(tempBuffer);
 
 									}
 								}
