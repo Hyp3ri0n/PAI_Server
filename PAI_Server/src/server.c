@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
+#include <curl/curl.h>
 
 
 #define NOTHING 0
@@ -163,6 +164,10 @@ void finfils(int sig)
 
 
 char buffer[1024] = "";
+int length_request = 0;
+char* request_body;
+char* xmlContent;
+char id_infirmiere[3];
 
 void readLine(int id_socket)
 {
@@ -189,6 +194,25 @@ void readLine(int id_socket)
 	}
 
 	printf("FIN TRAITEMENT (ligne)\n");
+}
+
+
+void parseRequest()
+{
+
+	char* xml = "&xml=";
+	char* temp = strstr(request_body, xml);
+
+	//GESTION ID + XML
+	int i;
+	for (i = 0; i < 3; i++)
+		id_infirmiere[i] = request_body[3 + i];
+
+	char* test = temp + 5;
+	strcpy(xmlContent, test);
+
+
+	printf("ID INFIRMIERE : %s\nXML : %s\n", id_infirmiere, xmlContent);
 }
 
 
@@ -375,7 +399,7 @@ int main(int argc, char *argv[])
 									printf("SORTI avec legnth req -> %i\n", length_request);
 								}
 
-								char* request_body = malloc(length_request);
+								request_body = malloc(length_request);
 								while(length_read < length_request)
 								{
 									printf("BOUCLE -> read = %i \n", length_read);
@@ -383,20 +407,24 @@ int main(int argc, char *argv[])
 									printf("REQUEST BODY -> %s\n", request_body);
 								}
 
-								char xmlContent[length_request];
-								char id[3];
 								char* xml = "&xml=";
 								char* temp = strstr(request_body, xml);
-
+								xmlContent = malloc(length_request);
 								//GESTION ID + XML
 								int i;
 								for (i = 0; i < 3; i++)
-									id[i] = request_body[3 + i];
+								{
+									id_infirmiere[i] = request_body[3 + i];
+								}
 
 								char* test = temp + 5;
 								strcpy(xmlContent, test);
 
-								printf("ID INFIRMIERE : %i\nXML : %s\n", id, xmlContent);
+
+								printf("ID INFIRMIERE : %s\nXML : %s\n", id_infirmiere, xmlContent);
+
+								//parseRequest();
+
 
 								/*printf("INFO : Read octets -> %i\n> %s\n\n", nbOctetRecusFull, bufferFull);
 
@@ -422,6 +450,7 @@ int main(int argc, char *argv[])
 
 								exit(0); /* fin du processus fils */ //Quand interaction finie, dans une fonction, recup la requete, contacter gg, traitement
 								break;
+
 							default:
 								/* PROCESSUS PERE */
 								//Ferme la socket de service
