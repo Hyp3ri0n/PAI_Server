@@ -292,6 +292,8 @@ int main(int argc, char *argv[])
 
 								printf("INFO : Read octets -> %i\n> %s\n\n", nbOctetRecusFull, bufferFull);
 
+
+								//Traitement de la requête
 								InfRequest request;
 								readLine(bufferFull, &request);
 
