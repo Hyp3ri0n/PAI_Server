@@ -265,8 +265,10 @@ int main(int argc, char *argv[])
 				{
 					/** int pid : PID du processus fils **/
 					int pid;
-					char bufferReception[255];
-					char bufferFull[2048];
+					int tailleBufferReception = 255;
+					int tailleBufferFull = 2048;
+					char* bufferReception = (char*)malloc(tailleBufferReception);
+					char* bufferFull = (char*)malloc(tailleBufferFull);
 					int nbOctetRecus = 0;
 					int nbOctetRecusFull = 0;
 
@@ -288,6 +290,15 @@ int main(int argc, char *argv[])
 								{
 									nbOctetRecusFull = nbOctetRecus + nbOctetRecusFull;
 									strcat(bufferFull, bufferReception);
+
+									if ((strlen(bufferFull) + tailleBufferReception) > tailleBufferFull)
+									{
+										void* tempBuffer = (char *) realloc(bufferFull, sizeof(bufferFull) + tailleBufferFull);
+
+										if (tempBuffer != NULL)
+											bufferFull = tempBuffer;
+
+									}
 								}
 
 								printf("INFO : Read octets -> %i\n> %s\n\n", nbOctetRecusFull, bufferFull);
@@ -301,6 +312,10 @@ int main(int argc, char *argv[])
 								printf("INFO : Struct InfRequest -> IDINF : %s.\n", request.idInf);
 								printf("INFO : Struct InfRequest -> XMLCONTENT : %s.\n", request.xmlContent);
 
+
+								//free buffer
+								free(bufferFull);
+								free(bufferReception);
 
 
 								//Ferme la socket d'écoute

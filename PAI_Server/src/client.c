@@ -97,6 +97,7 @@ int main(int argc, char* argv[])
 			{
 				len_sent = len_sent + write(id_socket_client_emmet, bufferEnvoi + len_sent, 255);
 				printf("INFO : Write octets -> %i.\n", len_sent);
+				fflush(stdout);
 			}
 		}
 		else
