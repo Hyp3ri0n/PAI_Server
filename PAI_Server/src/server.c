@@ -36,12 +36,12 @@
 /**
  * Structure
  */
-struct S_InfRequest {
+/*struct S_InfRequest {
 	int contentLength;
 	char* idInf;
 	char* xmlContent;
 };
-typedef struct S_InfRequest InfRequest;
+typedef struct S_InfRequest InfRequest;*/
 
 
 
@@ -60,7 +60,7 @@ void finfils(int sig)
 /**
  * Permet de lire ligne à ligne la requête et de remplir la structure InfRequest
  */
-void readLine(char* request, InfRequest* r)
+/*void readLine(char* request, InfRequest* r)
 {
 	char recup[255];
 	int lengthRequest = strlen(request);
@@ -159,7 +159,63 @@ void readLine(char* request, InfRequest* r)
 
 	if (requestOK == 0)
 		r = NULL;
+}*/
+
+
+char buffer[1024] = "";
+
+void readLine(int id_socket)
+{
+	memset(buffer, 0, sizeof(buffer));
+	int i = 0;
+	int lu;
+	char caractere[1];
+	char* lastChar;
+
+	while(1)
+	{
+		lu = read(id_socket, caractere, 1);
+
+		if (lu == 0 || caractere[0] == '\n')
+		{
+			buffer[i] = caractere[0];
+			buffer[i+1] = '\0';
+			break;
+		}
+
+		buffer[i] = caractere[0];
+		i++;
+
+	}
+
+	printf("FIN TRAITEMENT (ligne)\n");
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 int main(int argc, char *argv[])
@@ -286,7 +342,7 @@ int main(int argc, char *argv[])
 								//Ferme la socket d'écoute
 								close(id_socket_server_listen);
 
-								while ((nbOctetRecus = read(id_socket_server_service, bufferReception, sizeof(bufferReception))) != 0)
+								/*while ((nbOctetRecus = read(id_socket_server_service, bufferReception, sizeof(bufferReception))) != 0)
 								{
 									nbOctetRecusFull = nbOctetRecus + nbOctetRecusFull;
 									strcat(bufferFull, bufferReception);
@@ -301,9 +357,33 @@ int main(int argc, char *argv[])
 											free(tempBuffer);
 
 									}
+								}*/
+								int length_request = 0; //TODO récuperer la taille depuis HEADER
+								int length_read = 0; // incrémenté par READ
+
+								while((int)strlen(buffer) != 2)
+								{
+									readLine(id_socket_server_service);
+
+									printf("BUFFER : %s\n", buffer);
+
+									if(strstr(buffer, "Content-Length: ") != NULL)
+									{
+										printf("LENGHT : %s", buffer);
+										length_request = atoi(buffer + 16);
+									}
+									printf("SORTI avec legnth req -> %i\n", length_request);
 								}
 
-								printf("INFO : Read octets -> %i\n> %s\n\n", nbOctetRecusFull, bufferFull);
+								char* request_body = malloc(length_request);
+								while(length_read < length_request)
+								{
+									printf("BOUCLE -> read = %i \n", length_read);
+									length_read = length_read + read(id_socket_server_service, (request_body + length_read), length_request);
+									printf("REQUEST BODY -> %s\n", request_body);
+								}
+
+								/*printf("INFO : Read octets -> %i\n> %s\n\n", nbOctetRecusFull, bufferFull);
 
 								fflush(stdout);
 
@@ -314,12 +394,12 @@ int main(int argc, char *argv[])
 
 								printf("INFO : Struct InfRequest -> CONTENTLENGTH : %i.\n", request.contentLength);
 								printf("INFO : Struct InfRequest -> IDINF : %s.\n", request.idInf);
-								printf("INFO : Struct InfRequest -> XMLCONTENT : %s\n\n", request.xmlContent);
+								printf("INFO : Struct InfRequest -> XMLCONTENT : %s\n\n", request.xmlContent);*/
 
 
 								//free buffer
-								free(bufferFull);
-								free(bufferReception);
+								/*free(bufferFull);
+								free(bufferReception);*/
 
 
 								//Ferme la socket d'écoute
