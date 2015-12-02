@@ -154,7 +154,7 @@ void readLine(char* request, InfRequest* r)
 	r->xmlContent = xmlContent;
 
 	printf("INFO : Request -> IDINF : %s.\n", r->idInf);
-	printf("INFO : Request -> XMLCONTENT : %s.\n", r->xmlContent);
+	printf("INFO : Request -> XMLCONTENT : %s\n", r->xmlContent);
 
 
 	if (requestOK == 0)
@@ -312,7 +312,7 @@ int main(int argc, char *argv[])
 
 								printf("INFO : Struct InfRequest -> CONTENTLENGTH : %i.\n", request.contentLength);
 								printf("INFO : Struct InfRequest -> IDINF : %s.\n", request.idInf);
-								printf("INFO : Struct InfRequest -> XMLCONTENT : %s.\n", request.xmlContent);
+								printf("INFO : Struct InfRequest -> XMLCONTENT : %s\n", request.xmlContent);
 
 
 								//free buffer
