@@ -267,6 +267,9 @@ int main(int argc, char *argv[])
 								// appel du client pour requete Google
 								client();
 
+								//TODO ENvoi du contenu du fichier HTML au server NODEJS avec la socket de service
+
+
 								//Ferme la socket d'écoute
 								close(id_socket_server_service);
 

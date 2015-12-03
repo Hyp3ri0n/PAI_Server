@@ -131,6 +131,7 @@ int client()
 
 			fclose(fichierXmlGoogle);
 
+			//TODO : Verifications
 			SortVisits triVisites;
 			triVisites.processDistanceMatrix("../data/cabinet.xml","../data/reponseGoogle.xml", 1, "../data/cabinet.xslt", "../data/cabinet.html");
 		}
