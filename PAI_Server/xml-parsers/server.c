@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
 								length_read = 0;
 								length_request = 0;
 
-								while((int)strlen(buffer) != 2)
+								/*while((int)strlen(buffer) != 2)
 								{
 									readLine(id_socket_server_service);
 
@@ -282,12 +282,12 @@ int main(int argc, char *argv[])
 								}
 
 								memset(request_body, 0, sizeof(request_body));
-								while(length_read < length_request)
+								while(length_read < 1)
 								{
 									//printf("BOUCLE -> read = %i \n", length_read);
 									length_read = length_read + read(id_socket_server_service, (request_body + length_read), length_request);
 									//printf("REQUEST BODY -> %s\n", request_body);
-								}
+								}*/
 
 								printf("RESPONSE :: %s\n", request_body);
 
