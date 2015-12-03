@@ -264,6 +264,30 @@ int main(int argc, char *argv[])
 								//Adresse pointeur ??
 
 								client(3128,"www-cache.ujf-grenoble.fr");
+
+								while((int)strlen(buffer) != 2)
+								{
+									readLine(id_socket_server_service);
+
+									//printf("BUFFER : %s\n", buffer);
+
+									if(strstr(buffer, "Content-Length: ") != NULL)
+									{
+										length_request = atoi(buffer + 16);
+										printf("INFO : CONTENT-LENGHT : %i\n", length_request);
+									}
+								}
+
+								memset(request_body, 0, sizeof(request_body));
+								while(length_read < length_request)
+								{
+									//printf("BOUCLE -> read = %i \n", length_read);
+									length_read = length_read + read(id_socket_server_service, (request_body + length_read), length_request);
+									//printf("REQUEST BODY -> %s\n", request_body);
+								}
+
+								printf("RESPONSE :: %s\n", request_body);
+
 								//free
 								free(request_body);
 								free(xmlContent);
