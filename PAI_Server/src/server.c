@@ -24,25 +24,13 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
-
-
-#define NOTHING 0
-#define POST 1
-#define LENGTH 2
-#define CONTENT 3
+#include <curl/curl.h>
 
 
 
-/**
- * Structure
- */
-struct S_InfRequest {
-	int contentLength;
-	char* idInf;
-	char* xmlContent;
-};
-typedef struct S_InfRequest InfRequest;
-
+//Variables globales
+char buffer[1024] = "";
+char* request_body;
 
 
 
@@ -57,108 +45,33 @@ void finfils(int sig)
 	wait();
 }
 
+
 /**
  * Permet de lire ligne à ligne la requête et de remplir la structure InfRequest
  */
-void readLine(char* request, InfRequest* r)
+void readLine(int id_socket)
 {
-	char recup[255];
-	int lengthRequest = strlen(request);
-	int lengthContent = 0;
-	int lengthRead = 0;
-	int finLigne = 1;
-	int requestOK = 0;
-	int indiceLigne;
-	int state;
+	memset(buffer, 0, sizeof(buffer));
+	int i = 0;
+	int lu;
+	char caractere[1];
+	char* lastChar;
 
-	//GESTION ENTETE
-	while(lengthRequest > lengthRead)
+	while(1)
 	{
-		if(request[lengthRead] != '\n')
+		lu = read(id_socket, caractere, 1);
+
+		if (lu == 0 || caractere[0] == '\n')
 		{
-			if(finLigne == 1)
-			{
-				indiceLigne = 0;
-				finLigne = 0;
-				memset(recup, 0, sizeof(recup));
-				state = NOTHING;
-			}
-
-			recup[indiceLigne] = request[lengthRead];
-
-			if(state == NOTHING)
-			{
-				if(strcmp(recup,"POST") == 0)
-				{
-					state = POST;
-				}
-				else if(strcmp(recup,"Content-Length") == 0)
-				{
-					state = LENGTH;
-				}
-				else if(strcmp(recup,"id") == 0)
-				{
-					state = CONTENT;
-				}
-			}
-		}
-		else
-		{
-			finLigne = 1;
-
-			switch(state)
-			{
-				case POST:
-					printf("INFO : Request -> POST : %s.\n", recup);
-					if(strcmp(recup,"POST /INFIRMIERE HTTP/1.1"))
-						requestOK = 1;
-					break;
-
-				case LENGTH:
-					printf("INFO : Request -> CONTENTLENGTH : %s.\n", recup);
-
-					lengthContent = atoi(recup + 16);
-					r->contentLength = lengthContent;
-
-					break;
-
-				default:
-					break;
-			}
-		}
-		lengthRead++;
-		indiceLigne++;
-
-		if (state == CONTENT)
-		{
-			lengthRead++; //Pour sauter le "=" dans "id=..."
+			buffer[i] = caractere[0];
+			buffer[i+1] = '\0';
 			break;
 		}
+
+		buffer[i] = caractere[0];
+		i++;
+
 	}
-
-
-	char xmlContent[r->contentLength];
-	char id[3];
-	char* xml = "&xml=";
-	char* temp = strstr(request, xml);
-
-	//GESTION ID + XML
-	int i;
-	for (i = 0; i < 3; i++)
-		id[i] = request[lengthRead + i];
-
-	char* test = temp + 5;
-	strcpy(xmlContent, test);
-
-	r->idInf = id;
-	r->xmlContent = xmlContent;
-
-	printf("INFO : Request -> IDINF : %s.\n", r->idInf);
-	printf("INFO : Request -> XMLCONTENT : %s\n\n", r->xmlContent);
-
-
-	if (requestOK == 0)
-		r = NULL;
 }
 
 
@@ -265,12 +178,13 @@ int main(int argc, char *argv[])
 				{
 					/** int pid : PID du processus fils **/
 					int pid;
-					int tailleBufferReception = 255;
-					int tailleBufferFull = 2048;
-					char* bufferReception = (char*)malloc(tailleBufferReception);
-					char* bufferFull = (char*)malloc(tailleBufferFull);
-					int nbOctetRecus = 0;
-					int nbOctetRecusFull = 0;
+
+					//Variables SUPER UTILES
+					char* xmlContent;
+					char id_infirmiere[3];
+					int length_request = 0;
+
+					FILE* fichierXmlSave = NULL;
 
 					//Création du fils
 					pid = fork();
@@ -286,47 +200,75 @@ int main(int argc, char *argv[])
 								//Ferme la socket d'écoute
 								close(id_socket_server_listen);
 
-								while ((nbOctetRecus = read(id_socket_server_service, bufferReception, sizeof(bufferReception))) != 0)
+								int length_request = 0; //TODO récuperer la taille depuis HEADER
+								int length_read = 0; // incrémenté par READ
+								fichierXmlSave = fopen("xmlRequest.xml","w");
+								if(fichierXmlSave == NULL)
 								{
-									nbOctetRecusFull = nbOctetRecus + nbOctetRecusFull;
-									strcat(bufferFull, bufferReception);
+									printf("ERROR : Impossible d'ouvrir le fichier\n");
+								}
+								else
+								{
+									printf("INFO : Fichier ouvert\n");
+								}
 
-									if ((strlen(bufferFull) + tailleBufferReception) > tailleBufferFull)
+
+								while((int)strlen(buffer) != 2)
+								{
+									readLine(id_socket_server_service);
+
+									//printf("BUFFER : %s\n", buffer);
+
+									if(strstr(buffer, "Content-Length: ") != NULL)
 									{
-										void* tempBuffer = (char *) realloc(bufferFull, ((int)strlen(bufferFull) + tailleBufferFull));
-
-										if (tempBuffer != NULL)
-											bufferFull = tempBuffer;
-										else
-											free(tempBuffer);
-
+										length_request = atoi(buffer + 16);
+										printf("INFO : CONTENT-LENGHT : %i\n", length_request);
 									}
 								}
 
-								printf("INFO : Read octets -> %i\n> %s\n\n", nbOctetRecusFull, bufferFull);
+								request_body = malloc(length_request);
+								while(length_read < length_request)
+								{
+									//printf("BOUCLE -> read = %i \n", length_read);
+									length_read = length_read + read(id_socket_server_service, (request_body + length_read), length_request);
+									//printf("REQUEST BODY -> %s\n", request_body);
+								}
 
-								fflush(stdout);
+								char* xml = "&xml=";
+								char* startXmlParam = strstr(request_body, xml);
+								xmlContent = malloc(length_request);
 
+								//GESTION ID + XML
+								int i;
+								for (i = 0; i < 3; i++)
+								{
+									id_infirmiere[i] = request_body[3 + i];
+								}
 
-								//Traitement de la requête
-								InfRequest request;
-								readLine(bufferFull, &request);
+								char* startXmlValue = startXmlParam + 5;
+								strcpy(xmlContent, startXmlValue);
 
-								printf("INFO : Struct InfRequest -> CONTENTLENGTH : %i.\n", request.contentLength);
-								printf("INFO : Struct InfRequest -> IDINF : %s.\n", request.idInf);
-								printf("INFO : Struct InfRequest -> XMLCONTENT : %s\n\n", request.xmlContent);
+								//TODO : Something
+								char* request_good = curl_easy_unescape(curl_easy_init(), xmlContent, 0, NULL	);
 
+								printf("INFO : ID INFIRMIERE : %s\nINFO : XML : \n%s\n", id_infirmiere, request_good);
+								fputs(request_good, fichierXmlSave);
+								fclose(fichierXmlSave);
 
-								//free buffer
-								free(bufferFull);
-								free(bufferReception);
+								printf("INFO : Fichier fermé.\n");
 
+								curl_free(request_good);
+
+								//free
+								free(request_body);
+								free(xmlContent);
 
 								//Ferme la socket d'écoute
 								close(id_socket_server_service);
 
 								exit(0); /* fin du processus fils */ //Quand interaction finie, dans une fonction, recup la requete, contacter gg, traitement
 								break;
+
 							default:
 								/* PROCESSUS PERE */
 								//Ferme la socket de service
