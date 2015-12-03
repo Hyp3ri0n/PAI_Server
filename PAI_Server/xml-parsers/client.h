@@ -16,6 +16,7 @@
 #include <string.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <cstring>
 #include "FromXMLToGoogleMapHTTPRequest.h"
 
 int client(int port, char* nomServer);

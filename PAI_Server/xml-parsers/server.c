@@ -31,7 +31,7 @@
 
 //Variables globales
 char buffer[1024] = "";
-char* request_body;
+char* request_body = NULL;
 
 
 
@@ -170,8 +170,10 @@ int main(int argc, char *argv[])
 			{
 				printf("SUCCESS : Listen socket écoute.\n");
 
-				//int sizeofSockaddr_in = sizeof(struct sockaddr_in);
-				int id_socket_server_service = accept(id_socket_server_listen, (struct sockaddr *)&p, (socklen_t*)sizeof(&p));
+				int sizeofSockaddr_in = sizeof(struct sockaddr_in);
+				int id_socket_server_service = accept(id_socket_server_listen, (struct sockaddr *)&p, (socklen_t*)&sizeofSockaddr_in);
+
+				printf("CREATION %i\n", id_socket_server_service);
 
 				while (id_socket_server_service != -1)
 				{
@@ -260,7 +262,8 @@ int main(int argc, char *argv[])
 
 								curl_free(request_good);
 								//Adresse pointeur ??
-								client(3128,hostinfos->h_addr);
+
+								client(3128,"www-cache.ujf-grenoble.fr");
 								//free
 								free(request_body);
 								free(xmlContent);
@@ -283,8 +286,11 @@ int main(int argc, char *argv[])
 						perror("ERROR : Fork sur père.\n");
 
 					//"Pourquoi pas" - Hugo
-					id_socket_server_service = accept(id_socket_server_listen, (struct sockaddr *)&p, (socklen_t*)sizeof(&p));
+					id_socket_server_service = accept(id_socket_server_listen, (struct sockaddr *)&p, (socklen_t*)&sizeofSockaddr_in);
 				}
+
+				perror("ERROR : Fermeture du server EXIT.\n");
+				//close(id_socket_server_listen);
 				/*else
 					perror("ERROR : Accept socket écoute.\n");*/
 			}

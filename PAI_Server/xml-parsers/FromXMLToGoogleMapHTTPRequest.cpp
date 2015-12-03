@@ -52,7 +52,7 @@ char * FromXMLToGoogleMapHTTPRequest::getGoogleHttpRequest(char * dataBaseFileNa
     // Une fois que l'on a terminé le parsing du document, on converti la liste d'adresse en requête Google
     // et on la stocke dans l'attribut request de type std::string (plus facile à manipuler que char *).
     request = "origins=" + std::string(curl_easy_escape(NULL,addressList.c_str(),0)) + "&destinations=" + std::string(curl_easy_escape(NULL,addressList.c_str(),0));
-    
+
     // Convertir la requête au format std::string en char *
     //    result = request.c_str(); -> ne fonctionne pas car request.c_str() renvoie quelque chose de const
     result = new char[request.length() + 1];

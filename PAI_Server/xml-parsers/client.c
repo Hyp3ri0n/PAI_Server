@@ -45,7 +45,9 @@ int client(int port, char* nomServer)
 		//Copie de l'adresse de la machine dans la structure de config de la socket
 		memcpy(&(p.sin_addr.s_addr), hostinfos->h_addr, hostinfos->h_length);
 
-		if (connect(id_socket_client_emmet, (struct sockaddr *)&p, sizeof(struct sockaddr_in)) == 0)
+		int sizeofSockaddr_in = sizeof(struct sockaddr_in);
+
+		if (connect(id_socket_client_emmet, (struct sockaddr *)&p, (socklen_t)sizeofSockaddr_in) == 0)
 		{
 			printf("SUCCESS : Connect socket d'émission.\n");
 
@@ -53,13 +55,15 @@ int client(int port, char* nomServer)
 			FromXMLToGoogleMapHTTPRequest r;
 			char* req = r.getGoogleHttpRequest("../data/cabinet.xml", 001);
 			//char* req = "origins=...&destinations=...";
+			printf("REQUETE : %s.\n", req);
 			char* finGet = " HTTP/1.1\nAccept: text/html, application/xhtml+xml,application/xml\nAccept-language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3-us";
-
+			printf("PB1\n");
 			char* bufferEnvoi = "GET\nhttp://maps.googleapis.com/maps/api/distancematrix/xml?sensor=false&mode=driving&unit=metric&";
-
+			printf("PB2\n");
 			strcat(bufferEnvoi, req);
+			printf("PB3\n");
 			strcat(bufferEnvoi, finGet);
-
+			printf("PB4\n");
 			printf("INFO : Request -> %s\n", bufferEnvoi);
 
 			//Gestion de l'envoi
