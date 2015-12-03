@@ -1,43 +1,43 @@
-# Oct.2015 - L3 Miage
-# Fernandes Aurélien & Martinier Alexis
+CC=g++
+CFLAGS= -Wall -Wextra 
+INCLUDEFLAGS=-I/usr/include/libxml2 -I/usr/include/glibmm-2.4 -I/usr/lib/x86_64-linux-gnu/glibmm-2.4/include -I/usr/include/sigc++-2.0 -I/usr/lib/x86_64-linux-gnu/sigc++-2.0/include -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -I/usr/include/libxml++-2.6 -I/usr/lib/libxml++-2.6/include -I/usr/include/curl 
+LDLIBS=-L/opt/local/lib  -lcurl -lxml++-2.6 -lxml2 -lglibmm-2.4 -lgobject-2.0 -lsigc-2.0 -lglib-2.0 -lxslt
 
-#Definition du Compilateur
-CC = gcc
+all: testParsers
 
-#Definition des repertoires
-SRCS_DIR = src
-BIN_DIR = bin
-OBJS_DIR = objets
-HEAD_DIR = includes
+testParsers: testParsers.o LwSaxParser.o FromXMLToGoogleMapHTTPRequest.o FromGoogleMapXMLToDistanceTable.o SortVisits.o Address.o tsp.o triBulle.o kruskal.o
+	$(CC) Address.o SortVisits.o FromGoogleMapXMLToDistanceTable.o FromXMLToGoogleMapHTTPRequest.o LwSaxParser.o testParsers.o tsp.o triBulle.o kruskal.o -o testParsers $(LDLIBS)
 
-#Definition des sources & objets neccesaire a la compilation
-SRCS = $(wildcard $(SRCS_DIR)/*.c) $(wildcard $(SRCS_DIR)/*.cpp)
-OBJS = $(SRCS:$(SRCS_DIR)/%.c=$(OBJS_DIR)/%.o)
+testParsers.o : FromXMLToGoogleMapHTTPRequest.o LwSaxParser.o testParsers.c
+	$(CC) -c $(CFLAGS) $(INCLUDEFLAGS) testParsers.c -o testParsers.o
 
-#Definition des Flags pour la compilation
-#-D'NB_NODE=4' -> definition de la constante NB_NODE à 4
-#-I$(HEAD_DIR) -> inclusion des .h
-#-std=c99      -> demande a compiler avec le standard c99 (permet entre autre la déclaration de variable dans des conditions (int i dans un for))
-CFLAGS = -I$(HEAD_DIR) -std=c99 -D'NB_NODE=4' -D'NB_DIGIT=5' -w
+LwSaxParser.o : LwSaxParser.h LwSaxParser.cpp
+	$(CC) -c $(CFLAGS) $(INCLUDEFLAGS) LwSaxParser.cpp -o LwSaxParser.o
 
-#Definition du programme principal
-EXEC = $(BIN_DIR)/dictionnaire
+FromXMLToGoogleMapHTTPRequest.o :  Address.h FromXMLToGoogleMapHTTPRequest.h FromXMLToGoogleMapHTTPRequest.cpp LwSaxParser.h LwSaxParser.cpp
+	$(CC) -c $(CFLAGS) $(INCLUDEFLAGS) FromXMLToGoogleMapHTTPRequest.cpp -o FromXMLToGoogleMapHTTPRequest.o
 
-all: $(EXEC)
+FromGoogleMapXMLToDistanceTable.o : FromGoogleMapXMLToDistanceTable.h FromGoogleMapXMLToDistanceTable.cpp LwSaxParser.h LwSaxParser.cpp
+	$(CC) -c $(CFLAGS) $(INCLUDEFLAGS) FromGoogleMapXMLToDistanceTable.cpp -o FromGoogleMapXMLToDistanceTable.o
 
-#Generation de l'executable
-$(EXEC): $(OBJS)
-	@echo "Compilation ..."
-	@$(CC) $(OBJS) -o $(EXEC)
-	@echo "done"
+SortVisits.o : SortVisits.h SortVisits.cpp Address.h
+	$(CC) -c $(CFLAGS) $(INCLUDEFLAGS) SortVisits.cpp -o SortVisits.o	
+Address.o : Address.h Address.cpp
+	$(CC) -c $(CFLAGS) $(INCLUDEFLAGS) Address.cpp -o Address.o
+triBulle.o : triBulle.h triBulle.cpp
+	$(CC) -c $(CFLAGS) $(INCLUDEFLAGS) triBulle.cpp -o triBulle.o
+tsp.o : tsp.h tsp.cpp
+	$(CC) -c $(CFLAGS) $(INCLIDEFLAGS) tsp.cpp -o tsp.o
+kruskal.o : kruskal.h kruskal.cpp
+	$(CC) -c $(CFLAGS) $(INCLUDEFLAGS) kruskal.cpp -o kruskal.o
 
-#Generarion des .o depuis les .c
-$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c $(SRCS_DIR)/%.cpp
-	@$(CC) $(CFLAGS) -c $< -o $@
-
-#Regle de nettoyage
+server.o : server.h server.c
+	$(CC) -c $(FLAGS) $(INCLUDES) server.c --o server.o 
+	
 clean:
-	@echo "Delete executable & objets files"
-	@rm $(OBJS)
-	@rm $(EXEC)
-	@echo "done"
+	rm -rf *o 
+	rm -rf *~
+	rm -rf #*
+
+realclean: clean
+	rm -rf testParsers

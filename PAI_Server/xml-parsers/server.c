@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
 
 								int length_request = 0; //TODO récuperer la taille depuis HEADER
 								int length_read = 0; // incrémenté par READ
-								fichierXmlSave = fopen("xmlRequest.xml","w");
+								fichierXmlSave = fopen("../data/xmlRequest.xml","w");
 								if(fichierXmlSave == NULL)
 								{
 									printf("ERROR : Impossible d'ouvrir le fichier\n");
