@@ -13,50 +13,11 @@
 /*																	*/
 /********************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <netdb.h>
-#include "../xml-parsers/FromXMLToGoogleMapHTTPRequest.h"
+#include "client.h"
 
 // ./client -p XXXX -s SERVER
-int main(int argc, char* argv[])
+int client(int port, char* nomServer)
 {
-
-	/********************************************************************/
-	/*																	*/
-	/*						GESTION DE L'INTERFACE						*/
-	/*																	*/
-	/********************************************************************/
-
-	/** int port : Entier qui defini le port entré par l'utilisateur **/
-	int port;
-	/** char* server : Chaine de caractères conteant le nom de la machine **/
-	char server[1024];
-
-	if (argc == 5)
-	{
-		port = atoi(argv[2]);
-		strcpy(server, argv[4]);
-	}
-	else if (argc == 3)
-	{
-		port = atoi(argv[2]);
-
-		//Si pas d'adresse ip renseigner alors faire en local
-		server[1023] = '\0';
-		gethostname(server, 1023);
-	}
-	else
-	{
-		perror("INFO : Vous n'avez pas saisi toutes les informations nécessaire.\n");
-		perror("INFO : Arrêt de l'application.\n");
-		exit(0);
-	}
-
 
 	/********************************************************************/
 	/*																	*/
@@ -65,7 +26,7 @@ int main(int argc, char* argv[])
 	/********************************************************************/
 
 	/** struct hostent* : Structure qui contient la configuration de la machine **/
-	struct hostent* hostinfos = gethostbyname(server);
+	struct hostent* hostinfos = gethostbyname(nomServer);
 
 	/** struct sockaddr_in* p : Structure qui contient la configuration de la socket **/
 	struct sockaddr_in p;
@@ -89,11 +50,20 @@ int main(int argc, char* argv[])
 			printf("SUCCESS : Connect socket d'émission.\n");
 
 			//TODO : Buffer à remplir avec la requête
-			char* req = getGoogleHttpRequest("../data/cabinet.xml", 001); // on chope la requette GG
-			char* bufferEnvoi = "GET\n" + req + "HTTP/1.1\nAccept: text/html, application/xhtml+xml,application/xml\nAccept-language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3-us";
+			FromXMLToGoogleMapHTTPRequest r;
+			char* req = r.getGoogleHttpRequest("../data/cabinet.xml", 001);
+			//char* req = "origins=...&destinations=...";
+			char* finGet = " HTTP/1.1\nAccept: text/html, application/xhtml+xml,application/xml\nAccept-language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3-us";
+
+			char* bufferEnvoi = "GET\nhttp://maps.googleapis.com/maps/api/distancematrix/xml?sensor=false&mode=driving&unit=metric&";
+
+			strcat(bufferEnvoi, req);
+			strcat(bufferEnvoi, finGet);
+
+			printf("INFO : Request -> %s\n", bufferEnvoi);
 
 			//Gestion de l'envoi
-			int len = strlen(bufferEnvoi);
+			/*int len = strlen(bufferEnvoi);
 			int len_sent = 0;
 			int taille = 255;
 			while (len_sent < len)
@@ -101,9 +71,11 @@ int main(int argc, char* argv[])
 				if (len - len_sent < 255)
 					taille = len - len_sent;
 
-				len_sent = len_sent + write(id_socket_client_emmet, bufferEnvoi + len_sent, taille);
+				int temp = write(id_socket_client_emmet, bufferEnvoi + len_sent, taille);
+				len_sent = len_sent + temp;
+
 				printf("INFO : Write octets -> %i.\n", len_sent);
-			}
+			}*/
 		}
 		else
 			perror("ERROR : Connect socket d'émission.\n");

@@ -25,6 +25,7 @@
 #include <signal.h>
 #include <string.h>
 #include <curl/curl.h>
+#include "client.h"
 
 
 
@@ -102,8 +103,6 @@ int main(int argc, char *argv[])
 	int defaultPort = 6842;
 	/** int port : Entier qui defini le port pour la socket d'écoute **/
 	int port;
-	/** char** ip : Chaine de caractères définissant l'adresse ip du serveur **/
-	char* ip = "127.0.0.1";
 
 	if (argc == 3 && strcmp(argv[1], "-p") == 0)
 		port = atoi(argv[2]);
@@ -171,8 +170,8 @@ int main(int argc, char *argv[])
 			{
 				printf("SUCCESS : Listen socket écoute.\n");
 
-				int sizeofSockaddr_in = sizeof(struct sockaddr_in);
-				int id_socket_server_service = accept(id_socket_server_listen, (struct sockaddr *)&p, &sizeofSockaddr_in);
+				//int sizeofSockaddr_in = sizeof(struct sockaddr_in);
+				int id_socket_server_service = accept(id_socket_server_listen, (struct sockaddr *)&p, (socklen_t*)sizeof(&p));
 
 				while (id_socket_server_service != -1)
 				{
@@ -182,7 +181,13 @@ int main(int argc, char *argv[])
 					//Variables SUPER UTILES
 					char* xmlContent;
 					char id_infirmiere[3];
+					char* xml = "&xml=";
+					char* startXmlParam;
+					char* request_good;
+					char* startXmlValue;
 					int length_request = 0;
+					int length_read = 0; // incrémenté par READ
+					int i;
 
 					FILE* fichierXmlSave = NULL;
 
@@ -200,8 +205,6 @@ int main(int argc, char *argv[])
 								//Ferme la socket d'écoute
 								close(id_socket_server_listen);
 
-								int length_request = 0; //TODO récuperer la taille depuis HEADER
-								int length_read = 0; // incrémenté par READ
 								fichierXmlSave = fopen("../data/xmlRequest.xml","w");
 								if(fichierXmlSave == NULL)
 								{
@@ -226,7 +229,7 @@ int main(int argc, char *argv[])
 									}
 								}
 
-								request_body = malloc(length_request);
+								request_body = (char *)malloc(length_request);
 								while(length_read < length_request)
 								{
 									//printf("BOUCLE -> read = %i \n", length_read);
@@ -234,22 +237,20 @@ int main(int argc, char *argv[])
 									//printf("REQUEST BODY -> %s\n", request_body);
 								}
 
-								char* xml = "&xml=";
-								char* startXmlParam = strstr(request_body, xml);
-								xmlContent = malloc(length_request);
+								startXmlParam = strstr(request_body, xml);
+								xmlContent = (char *)malloc(length_request);
 
 								//GESTION ID + XML
-								int i;
 								for (i = 0; i < 3; i++)
 								{
 									id_infirmiere[i] = request_body[3 + i];
 								}
 
-								char* startXmlValue = startXmlParam + 5;
+								startXmlValue = startXmlParam + 5;
 								strcpy(xmlContent, startXmlValue);
 
 								//TODO : Something
-								char* request_good = curl_easy_unescape(curl_easy_init(), xmlContent, 0, NULL	);
+								request_good = curl_easy_unescape(curl_easy_init(), xmlContent, 0, NULL	);
 
 								printf("INFO : ID INFIRMIERE : %s\nINFO : XML : \n%s\n", id_infirmiere, request_good);
 								fputs(request_good, fichierXmlSave);
@@ -258,7 +259,8 @@ int main(int argc, char *argv[])
 								printf("INFO : Fichier fermé.\n");
 
 								curl_free(request_good);
-
+								//Adresse pointeur ??
+								client(3128,hostinfos->h_addr);
 								//free
 								free(request_body);
 								free(xmlContent);
@@ -281,7 +283,7 @@ int main(int argc, char *argv[])
 						perror("ERROR : Fork sur père.\n");
 
 					//"Pourquoi pas" - Hugo
-					id_socket_server_service = accept(id_socket_server_listen, (struct sockaddr *)&p, &sizeofSockaddr_in);
+					id_socket_server_service = accept(id_socket_server_listen, (struct sockaddr *)&p, (socklen_t*)sizeof(&p));
 				}
 				/*else
 					perror("ERROR : Accept socket écoute.\n");*/

@@ -53,4 +53,5 @@ protected:
      */
 
 };
+
 #endif // LWSAXPARSER_H

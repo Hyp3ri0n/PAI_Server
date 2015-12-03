@@ -25,7 +25,6 @@ public:
      * @nurseNumber numéro de l'infirmière pour laquelle le serveur demande la requette
      */
     char * getGoogleHttpRequest(char * dataBaseFileName, int nurseNumber);
-    
 protected:
     
     /// Est-on en train de lire l'adresse du cabinet plutôt que celle d'un patient ?
@@ -57,7 +56,7 @@ protected:
 	 * @parameter name nom de l'élément
 	 * @parameter properties Liste des attributs de l'élément
 	 */
-	virtual void on_start_element(const Glib::ustring& name, const AttributeList& properties);
+    virtual void on_start_element(const Glib::ustring& name, const AttributeList& properties);
 
 	/**
 	 * Ce qui se passe lorsque l'on sort d'un élément
@@ -81,7 +80,7 @@ protected:
 protected:
     // Cherche attributeName dans la liste des attributs et renvoie sa valeur
     // renvoie la chaîne de caractères vide si l'attribut n'est pas trouvé.
-    std::string findAttribute(const AttributeList& attributeList, std::string attributeName);
+	std::string findAttribute(const AttributeList& attributeList, std::string attributeName);
 
 
 };

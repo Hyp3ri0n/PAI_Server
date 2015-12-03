@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Address.h"
-
 #include "FromXMLToGoogleMapHTTPRequest.h"
 
 // Constructeur
@@ -25,7 +24,6 @@ FromXMLToGoogleMapHTTPRequest::~FromXMLToGoogleMapHTTPRequest() {
         delete currentAddress;
     }    
 }
-
 
 char * FromXMLToGoogleMapHTTPRequest::getGoogleHttpRequest(char * dataBaseFileName, int nurseNumber) {
     char * result;
