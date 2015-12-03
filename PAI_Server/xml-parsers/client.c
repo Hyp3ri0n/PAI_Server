@@ -15,14 +15,11 @@
 
 #include "client.h"
 
-char client_buffer[1024] = "";
-//char* client_request_body = NULL;
-int client_length_request = 0;
-char buffer_client[5000];
+char c_buffer[1024] = "";
 
 void client_readLine(int id_socket)
 {
-	memset(client_buffer, 0, sizeof(client_buffer));
+	memset(c_buffer, 0, sizeof(c_buffer));
 	int i = 0;
 	int lu;
 	char caractere[1];
@@ -34,22 +31,24 @@ void client_readLine(int id_socket)
 
 		if (lu == 0 || caractere[0] == '\n')
 		{
-			client_buffer[i] = caractere[0];
-			client_buffer[i+1] = '\0';
+			c_buffer[i] = caractere[0];
+			c_buffer[i+1] = '\0';
 			break;
 		}
 
-		client_buffer[i] = caractere[0];
+		c_buffer[i] = caractere[0];
 		i++;
 
 	}
 }
 
-
-// ./client -p XXXX -s SERVER
-int client(int port, char* nomServer)
+/**
+ * Fonction appelé par le serveur pour communiquer avec Google
+ */
+int client()
 {
-
+	char buffer_client[5000];
+	FILE* fichierXmlGoogle = NULL;
 	/********************************************************************/
 	/*																	*/
 	/*						GESTION DES SOCKETS							*/
@@ -74,53 +73,66 @@ int client(int port, char* nomServer)
 		p.sin_port = htons(3128);
 
 		//Copie de l'adresse de la machine dans la structure de config de la socket
-		memcpy(&(p.sin_addr.s_addr), hostinfos->h_addr, hostinfos->h_length);
+		memcpy(&p.sin_addr.s_addr, hostinfos->h_addr, hostinfos->h_length);
 
 		int sizeofSockaddr_in = sizeof(struct sockaddr_in);
 
 		if (connect(id_socket_client_emmet, (struct sockaddr *)&p, (socklen_t)sizeofSockaddr_in) == 0)
 		{
 			printf("SUCCESS : Connect socket d'émission.\n");
-
+			fichierXmlGoogle = fopen("../data/reponseGoogle.xml","w");
+			if(fichierXmlGoogle == NULL)
+			{
+				printf("ERROR : Erreur ouverture du fichier (GOOGLE)\n");
+			}
+			else
+			{
+				printf("INFO : Fichier ouvert (GOOGLE)\n");
+			}
 			FromXMLToGoogleMapHTTPRequest r;
 
-			char* debutGet = "GEThttp://maps.googleapis.com/maps/api/distancematrix/xml?sensor=false&mode=driving&unit=metric&";
-			char* finGet = " HTTP/1.1\r\nAccept: text/html, application/xhtml+xml,application/xml\r\nAccept-language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3-us";
+			/*char* debutGet = "GEThttp://maps.googleapis.com/maps/api/distancematrix/xml?sensor=false&mode=driving&unit=metric&";
+			char* finGet = " HTTP/1.1\r\nAccept: text/html, application/xhtml+xml,application/xml\r\nAccept-language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3-us";*/
 
 			char* req = r.getGoogleHttpRequest("../data/xmlRequest.xml", 001);
 
 			//Exemple pour test
-			char* bufferEnvoi = "GEThttp://maps.googleapis.com/maps/api/distancematrix/xml?sensor=false&mode=driving&unit=metric&origins=St%2BMartin%2Bd%5C%27H%C3%A8res%2B38400%2B60%2BRue%2Bde%2Bla%2Bchimie%7CGrenoble%2B38031%2B46%2BAvenue%2BFelix%2Bviallet%7CLa%2BTronche%2B38700%2BRond-Point%2Bde%2Bla%2BCroix%2Bde%2BVie%7C&destinations=St%2BMartin%2Bd%5C%27H%C3%A8res%2B38400%2B60%2BRue%2Bde%2Bla%2Bchimie%7CGrenoble%2B38031%2B46%2BAvenue%2BFelix%2Bviallet%7CLa%2BTronche%2B38700%2BRond-Point%2Bde%2Bla%2BCroix%2Bde%2BVie%7C";
+			char* bufferEnvoi = (char*)malloc(300 + strlen(req) + 1);
+			sprintf(bufferEnvoi,"GET http://maps.googleapis.com/maps/api/distancematrix/xml?sensor=false&mode=driving&unit=metric&%s\r\nHTTP/1.1\r\nAccept: text/html,application/xhtml+xml,application/xml\nAccept-Language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3-us", req);
+			//bufferEnvoi = "GET http://maps.googleapis.com/maps/api/distancematrix/xml?sensor=false&mode=driving&unit=metric&origins=St%2BMartin%2Bd%5C%27H%C3%A8res%2B38400%2B60%2BRue%2Bde%2Bla%2Bchimie%7CGrenoble%2B38031%2B46%2BAvenue%2BFelix%2Bviallet%7CLa%2BTronche%2B38700%2BRond-Point%2Bde%2Bla%2BCroix%2Bde%2BVie%7C&destinations=St%2BMartin%2Bd%5C%27H%C3%A8res%2B38400%2B60%2BRue%2Bde%2Bla%2Bchimie%7CGrenoble%2B38031%2B46%2BAvenue%2BFelix%2Bviallet%7CLa%2BTronche%2B38700%2BRond-Point%2Bde%2Bla%2BCroix%2Bde%2BVie%7C\r\nHTTP/1.1\r\nAccept: text/html,application/xhtml+xml,application/xml\nAccept-Language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3-us";
+			printf("\n\nINFO : requete (obtenue par fonction getGoogleHttpRequest) ->\n\n%s\n\nINFO : requete à envoyer à Google ->\n\n%s\n\n", req, bufferEnvoi);
 
-			//Vrai job
-			//char* bufferEnvoi = strcat(debutGet, req);
+			// Partie non fonctionnelle
+			//
+			printf("ID SOCKET : %i\n", id_socket_client_emmet);
+			printf("BUUFER : %s\n", bufferEnvoi);
+			printf("SIZE : %i\n", strlen(bufferEnvoi));
 
-			printf("\n\nINFO : requete (obtenue par fonction getGoogleHttpRequest) ->\n\n%s\n\nINFO : requete à envoyer à Google ->\n\n %s\n\n", req, bufferEnvoi);
-
-			//Gestion de l'envoi
-			/*int len = strlen(bufferEnvoi);
-			int len_sent = 0;
-			int taille = 255;
-			while (len_sent < len)
-			{
-				if (len - len_sent < 255)
-					taille = len - len_sent;
-
-				int temp = write(id_socket_client_emmet, bufferEnvoi + len_sent, taille);
-				len_sent = len_sent + temp;
-
-				printf("INFO : total envoyé -> %i\nINFO : reste à envoyer : %s\n\n", len_sent, (bufferEnvoi + len_sent));
-			}*/
-
+			//Envoi vers Google via le proxy
 			write(id_socket_client_emmet, bufferEnvoi, strlen(bufferEnvoi));
-			printf("INFO : envoyé : %s\n", strlen(bufferEnvoi));
-
-			read(id_socket_client_emmet, client_buffer, 4500);
-
 			printf("INFO : FIN DE L'ENVOI\n");
 
 
 
+			//Lecture de la réponse
+			//read(id_socket_client_emmet, buffer_client, 4500);
+			printf("INFO : Réponse reçu ->\n%s\n", buffer_client);
+
+			while((int)strlen(c_buffer) != 2)
+			{
+				client_readLine(id_socket_client_emmet);
+			}
+
+			while(read(id_socket_client_emmet, buffer_client, 255) != 0)
+			{
+				fputs(buffer_client, fichierXmlGoogle);
+				memset(buffer_client,0,sizeof(buffer_client));
+			}
+
+			fclose(fichierXmlGoogle);
+
+			SortVisits triVisites;
+			triVisites.processDistanceMatrix("../data/cabinet.xml","../data/reponseGoogle.xml", 1, "../data/cabinet.xslt", "../data/cabinet.html");
 		}
 		else
 			perror("ERROR : Connect socket d'émission.\n");

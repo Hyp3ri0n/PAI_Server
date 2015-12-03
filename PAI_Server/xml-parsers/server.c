@@ -40,10 +40,11 @@ char* request_body = NULL;
  *
  * @param sig L'identifiant du signal ayant déclenché l'action (int)
  */
-void finfils(int sig)
+void receiveKillFromChild(int sig)
 {
-	printf("INFO : Reception de la mort d'un fils.\n");
+	//int status1 = 0;
 	wait();
+	printf("INFO : Reception de la mort d'un fils.\n");
 }
 
 
@@ -86,7 +87,7 @@ int main(int argc, char *argv[])
 
 	/** struct sigaction : La structure qui permet de ne pas bloquer le père à la fin de vie de ses fils **/
 	struct sigaction a;
-	a.sa_handler = finfils;
+	a.sa_handler = receiveKillFromChild;
 	a.sa_flags = SA_RESTART;
 
 	//Application de la structure sigaction
@@ -162,6 +163,7 @@ int main(int argc, char *argv[])
 			//Pour savoir le nom de la machine
 			char hostname[1024];
 			hostname[1023] = '\0';
+			//recupere l'hote sur 1023 caracteres
 			gethostname(hostname, 1023);
 			struct hostent* hostinfos = gethostbyname(hostname);
 			printf("INFO : Hostname -> %s\n", hostinfos->h_name);
@@ -232,9 +234,7 @@ int main(int argc, char *argv[])
 								request_body = (char *)malloc(length_request);
 								while(length_read < length_request)
 								{
-									//printf("BOUCLE -> read = %i \n", length_read);
 									length_read = length_read + read(id_socket_server_service, (request_body + length_read), length_request);
-									//printf("REQUEST BODY -> %s\n", request_body);
 								}
 
 								startXmlParam = strstr(request_body, xml);
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
 								startXmlValue = startXmlParam + 5;
 								strcpy(xmlContent, startXmlValue);
 
-								//TODO : Something
+								// url decode le xml
 								request_good = curl_easy_unescape(curl_easy_init(), xmlContent, 0, NULL	);
 
 								printf("INFO : ID INFIRMIERE : %s\nINFO : XML : \n%s\n", id_infirmiere, request_good);
@@ -258,18 +258,19 @@ int main(int argc, char *argv[])
 
 								printf("INFO : Fichier fermé.\n");
 
+								//libere la mémoire du decodage
 								curl_free(request_good);
-
-								client(3128,"www-cache.ujf-grenoble.fr");
-
 								//free
 								free(request_body);
 								free(xmlContent);
 
+								// appel du client pour requete Google
+								client();
+
 								//Ferme la socket d'écoute
 								close(id_socket_server_service);
 
-								exit(0); /* fin du processus fils */ //Quand interaction finie, dans une fonction, recup la requete, contacter gg, traitement
+								exit(0); /* fin du processus fils */
 								break;
 
 							default:
