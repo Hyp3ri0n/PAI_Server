@@ -51,17 +51,19 @@ int client(int port, char* nomServer)
 		{
 			printf("SUCCESS : Connect socket d'émission.\n");
 
-			//TODO : Buffer à remplir avec la requête
+
 			FromXMLToGoogleMapHTTPRequest r;
+
+			char* debutGet = "GET\nhttp://maps.googleapis.com/maps/api/distancematrix/xml?sensor=false&mode=driving&unit=metric&";
 			char* req = r.getGoogleHttpRequest("../data/xmlRequest.xml", 001);
-			//char* req = "origins=...&destinations=...";
-			printf("REQUETE : %s.\n", req);
 			char* finGet = " HTTP/1.1\nAccept: text/html, application/xhtml+xml,application/xml\nAccept-language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3-us";
-			printf("FIN GET : %s.\n", finGet);
-			char* bufferEnvoi = "GET\nhttp://maps.googleapis.com/maps/api/distancematrix/xml?sensor=false&mode=driving&unit=metric&origins=St%2BMartin%2Bd%5C%27H%C3%A8res%2B38400%2B60%2BRue%2Bde%2Bla%2Bchimie%7CGrenoble%2B38031%2B46%2BAvenue%2BFelix%2Bviallet%7CLa%2BTronche%2B38700%2BRond-Point%2Bde%2Bla%2BCroix%2Bde%2BVie%7C&destinations=St%2BMartin%2Bd%5C%27H%C3%A8res%2B38400%2B60%2BRue%2Bde%2Bla%2Bchimie%7CGrenoble%2B38031%2B46%2BAvenue%2BFelix%2Bviallet%7CLa%2BTronche%2B38700%2BRond-Point%2Bde%2Bla%2BCroix%2Bde%2BVie%7C HTTP/1.1\nAccept: text/html, application/xhtml+xml,application/xml\nAccept-language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3-us";
-			printf("DEBUT : %s.\n", bufferEnvoi);
-			printf("PB3\n");
-			//strcat(bufferEnvoi, finGet);
+
+			//Exemple pour test
+			//char* bufferEnvoi = "GET\nhttp://maps.googleapis.com/maps/api/distancematrix/xml?sensor=false&mode=driving&unit=metric&origins=St%2BMartin%2Bd%5C%27H%C3%A8res%2B38400%2B60%2BRue%2Bde%2Bla%2Bchimie%7CGrenoble%2B38031%2B46%2BAvenue%2BFelix%2Bviallet%7CLa%2BTronche%2B38700%2BRond-Point%2Bde%2Bla%2BCroix%2Bde%2BVie%7C&destinations=St%2BMartin%2Bd%5C%27H%C3%A8res%2B38400%2B60%2BRue%2Bde%2Bla%2Bchimie%7CGrenoble%2B38031%2B46%2BAvenue%2BFelix%2Bviallet%7CLa%2BTronche%2B38700%2BRond-Point%2Bde%2Bla%2BCroix%2Bde%2BVie%7C HTTP/1.1\nAccept: text/html, application/xhtml+xml,application/xml\nAccept-language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3-us";
+
+			//Vrai job
+			char* bufferEnvoi = debutGet + req + finGet;
+
 			printf("INFO : Request -> %s\n", bufferEnvoi);
 
 			//Gestion de l'envoi

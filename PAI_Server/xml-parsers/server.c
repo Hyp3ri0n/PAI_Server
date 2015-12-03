@@ -265,6 +265,9 @@ int main(int argc, char *argv[])
 
 								client(3128,"www-cache.ujf-grenoble.fr");
 
+								length_read = 0;
+								length_request = 0;
+
 								while((int)strlen(buffer) != 2)
 								{
 									readLine(id_socket_server_service);
