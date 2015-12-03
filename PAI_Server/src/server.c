@@ -30,7 +30,6 @@
 
 //Variables globales
 char buffer[1024] = "";
-int length_request = 0;
 char* request_body;
 
 
@@ -185,6 +184,9 @@ int main(int argc, char *argv[])
 					//Variables SUPER UTILES
 					char* xmlContent;
 					char id_infirmiere[3];
+					int length_request = 0;
+
+					FILE* fichierXmlSave = NULL;
 
 					//Création du fils
 					pid = fork();
@@ -202,32 +204,42 @@ int main(int argc, char *argv[])
 
 								int length_request = 0; //TODO récuperer la taille depuis HEADER
 								int length_read = 0; // incrémenté par READ
+								fichierXmlSave = fopen("xmlRequest.xml","w");
+								if(fichierXmlSave == NULL)
+								{
+									printf("ERROR : Impossible d'ouvrir le fichier\n");
+								}
+								else
+								{
+									printf("INFO : Fichier ouvert\n");
+								}
+
 
 								while((int)strlen(buffer) != 2)
 								{
 									readLine(id_socket_server_service);
 
-									printf("BUFFER : %s\n", buffer);
+									//printf("BUFFER : %s\n", buffer);
 
 									if(strstr(buffer, "Content-Length: ") != NULL)
 									{
-										printf("LENGHT : %s", buffer);
 										length_request = atoi(buffer + 16);
+										printf("INFO : LENGHT : %i", length_request);
 									}
-									printf("SORTI avec legnth req -> %i\n", length_request);
 								}
 
 								request_body = malloc(length_request);
 								while(length_read < length_request)
 								{
-									printf("BOUCLE -> read = %i \n", length_read);
+									//printf("BOUCLE -> read = %i \n", length_read);
 									length_read = length_read + read(id_socket_server_service, (request_body + length_read), length_request);
-									printf("REQUEST BODY -> %s\n", request_body);
+									//printf("REQUEST BODY -> %s\n", request_body);
 								}
 
 								char* xml = "&xml=";
-								char* temp = strstr(request_body, xml);
+								char* startXmlParam = strstr(request_body, xml);
 								xmlContent = malloc(length_request);
+
 								//GESTION ID + XML
 								int i;
 								for (i = 0; i < 3; i++)
@@ -235,24 +247,21 @@ int main(int argc, char *argv[])
 									id_infirmiere[i] = request_body[3 + i];
 								}
 
-								char* test = temp + 5;
-								strcpy(xmlContent, test);
-
-
-								printf("ID INFIRMIERE : %s\nXML : %s\n", id_infirmiere, xmlContent);
-
-
+								char* startXmlValue = startXmlParam + 5;
+								strcpy(xmlContent, startXmlValue);
 
 								//TODO : Something
+								char* request_good = curl_easy_unescape(curl_easy_init(), xmlContent, 0, NULL	);
 
+								printf("ID INFIRMIERE : %s\nXML : %s\n", id_infirmiere, request_good);
+								fputs(request_good, fichierXmlSave);
+								fclose(fichierXmlSave);
 
-
-
+								curl_free(request_good);
 
 								//free
 								free(request_body);
 								free(xmlContent);
-
 
 								//Ferme la socket d'écoute
 								close(id_socket_server_service);

@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 			printf("SUCCESS : Connect socket d'émission.\n");
 
 			//TODO : Buffer à remplir avec la requête
-			char* bufferEnvoi = "POST /INFIRMIERE HTTP/1.1\r\nHost: 127.0.0.1:4444\r\nContent-Type: app...\r\nContent-Length: 14\r\nVia: test...\r\nX-Forwarded-For: 192.168.0.1\r\nCache-Control: test...\r\nConnection: test...\r\n\r\nid=001&xml=%3C";
+			char* bufferEnvoi = "POST /INFIRMIERE HTTP/1.1\r\nHost: 127.0.0.1:4444\r\nContent-Type: app...\r\nContent-Length: 76\r\nVia: test...\r\nX-Forwarded-For: 192.168.0.1\r\nCache-Control: test...\r\nConnection: test...\r\n\r\nid=001&xml=%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22UTF-8%22%3F%3E%3C";
 
 			//Gestion de l'envoi
 			int len = strlen(bufferEnvoi);
