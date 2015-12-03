@@ -72,8 +72,6 @@ void readLine(int id_socket)
 		i++;
 
 	}
-
-	printf("FIN TRAITEMENT (ligne)\n");
 }
 
 
@@ -224,7 +222,7 @@ int main(int argc, char *argv[])
 									if(strstr(buffer, "Content-Length: ") != NULL)
 									{
 										length_request = atoi(buffer + 16);
-										printf("INFO : LENGHT : %i", length_request);
+										printf("INFO : CONTENT-LENGHT : %i\n", length_request);
 									}
 								}
 
@@ -253,9 +251,11 @@ int main(int argc, char *argv[])
 								//TODO : Something
 								char* request_good = curl_easy_unescape(curl_easy_init(), xmlContent, 0, NULL	);
 
-								printf("ID INFIRMIERE : %s\nXML : %s\n", id_infirmiere, request_good);
+								printf("INFO : ID INFIRMIERE : %s\nINFO : XML : \n%s\n", id_infirmiere, request_good);
 								fputs(request_good, fichierXmlSave);
 								fclose(fichierXmlSave);
+
+								printf("INFO : Fichier fermé.\n");
 
 								curl_free(request_good);
 
