@@ -47,7 +47,7 @@ char * FromXMLToGoogleMapHTTPRequest::getGoogleHttpRequest(char * dataBaseFileNa
     
     
     //TODO : SUPPR DERNIER PIPE EN TROP ADDRESS LIST
-    std::cout << "Adresse liste : " << addressList.c_str() << std::endl;
+    //std::cout << "Adresse liste : " << addressList.c_str() << std::endl;
     
     // Une fois que l'on a terminé le parsing du document, on converti la liste d'adresse en requête Google
     // et on la stocke dans l'attribut request de type std::string (plus facile à manipuler que char *).
@@ -87,7 +87,7 @@ void FromXMLToGoogleMapHTTPRequest::on_start_element(const Glib::ustring& name, 
 {
 	bool verif = false;
 	
-	std::cout << "Nom du noeud : " << name.c_str() << std::endl;
+	//std::cout << "Nom du noeud : " << name.c_str() << std::endl;
   
   if (strcmp(name.c_str(), "visite") == 0)
   {
@@ -141,7 +141,7 @@ void FromXMLToGoogleMapHTTPRequest::on_start_element(const Glib::ustring& name, 
   else
   {
 	  currentState = OTHER;
-	  std::cout << "[XML-CABINET]Noeud non géré : " << name.c_str() << std::endl;
+	  //std::cout << "[XML-CABINET]Noeud non géré : " << name.c_str() << std::endl;
   }
 }
 
@@ -184,7 +184,7 @@ void FromXMLToGoogleMapHTTPRequest::on_characters(const Glib::ustring& text)
 		  
 		case NUMERO:
 		  
-		  std::cout << "[FromXMLToGoogleMapHTTPRequest] Test numéro: Avant Set avec " << text.c_str() << std::endl;
+		  //std::cout << "[FromXMLToGoogleMapHTTPRequest] Test numéro: Avant Set avec " << text.c_str() << std::endl;
 		  //WIP set des num, etc...
 		  currentAddress->setNumero(text.c_str());
 		  break;
@@ -195,7 +195,7 @@ void FromXMLToGoogleMapHTTPRequest::on_characters(const Glib::ustring& text)
 		  textRue = text.c_str();
 		  replaceAll(textRue, "\'", "\\\'");
 		  replaceAll(textRue, " ", "+");
-		  std::cout << "[FromXMLToGoogleMapHTTPRequest] Test rue: Avant Set avec " << textRue << std::endl;
+		  //std::cout << "[FromXMLToGoogleMapHTTPRequest] Test rue: Avant Set avec " << textRue << std::endl;
 		  currentAddress->setRue(textRue);
 		  
 		  break;
@@ -203,7 +203,7 @@ void FromXMLToGoogleMapHTTPRequest::on_characters(const Glib::ustring& text)
 		case CODEPOSTAL:
 		  
 		  //WIP set des num, etc...
-		  std::cout << "[FromXMLToGoogleMapHTTPRequest] Test cp : Avant Set avec " << text.c_str() << std::endl;
+		  //std::cout << "[FromXMLToGoogleMapHTTPRequest] Test cp : Avant Set avec " << text.c_str() << std::endl;
 		  currentAddress->setCodePostal(text.c_str());
 		  
 		  break;
@@ -214,7 +214,7 @@ void FromXMLToGoogleMapHTTPRequest::on_characters(const Glib::ustring& text)
 		  textVille = text.c_str();
 		  replaceAll(textVille, "\'", "\\\'");
 		  replaceAll(textVille, " ", "+");
-		  std::cout << "[FromXMLToGoogleMapHTTPRequest] Test ville: Avant Set avec " << textVille << std::endl;
+		  //std::cout << "[FromXMLToGoogleMapHTTPRequest] Test ville: Avant Set avec " << textVille << std::endl;
 		  currentAddress->setVille(textVille);
 		  
 		  break;

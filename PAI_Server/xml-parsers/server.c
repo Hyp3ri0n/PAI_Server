@@ -187,9 +187,9 @@ int main(int argc, char *argv[])
 					char* startXmlParam;
 					char* request_good;
 					char* startXmlValue;
-					int length_request = 0;
+					int length_request = 0; // récupéré depuis la requete reçue
 					int length_read = 0; // incrémenté par READ
-					int i;
+					int i; // itération boucle
 
 					FILE* fichierXmlSave = NULL;
 
@@ -221,8 +221,6 @@ int main(int argc, char *argv[])
 								while((int)strlen(buffer) != 2)
 								{
 									readLine(id_socket_server_service);
-
-									//printf("BUFFER : %s\n", buffer);
 
 									if(strstr(buffer, "Content-Length: ") != NULL)
 									{
@@ -261,35 +259,8 @@ int main(int argc, char *argv[])
 								printf("INFO : Fichier fermé.\n");
 
 								curl_free(request_good);
-								//Adresse pointeur ??
 
 								client(3128,"www-cache.ujf-grenoble.fr");
-
-								length_read = 0;
-								length_request = 0;
-
-								/*while((int)strlen(buffer) != 2)
-								{
-									readLine(id_socket_server_service);
-
-									//printf("BUFFER : %s\n", buffer);
-
-									if(strstr(buffer, "Content-Length: ") != NULL)
-									{
-										length_request = atoi(buffer + 16);
-										printf("INFO : CONTENT-LENGHT : %i\n", length_request);
-									}
-								}
-
-								memset(request_body, 0, sizeof(request_body));
-								while(length_read < 1)
-								{
-									//printf("BOUCLE -> read = %i \n", length_read);
-									length_read = length_read + read(id_socket_server_service, (request_body + length_read), length_request);
-									//printf("REQUEST BODY -> %s\n", request_body);
-								}*/
-
-								printf("RESPONSE :: %s\n", request_body);
 
 								//free
 								free(request_body);
@@ -312,14 +283,10 @@ int main(int argc, char *argv[])
 					else
 						perror("ERROR : Fork sur père.\n");
 
-					//"Pourquoi pas" - Hugo
 					id_socket_server_service = accept(id_socket_server_listen, (struct sockaddr *)&p, (socklen_t*)&sizeofSockaddr_in);
 				}
 
 				perror("ERROR : Fermeture du server EXIT.\n");
-				//close(id_socket_server_listen);
-				/*else
-					perror("ERROR : Accept socket écoute.\n");*/
 			}
 			else
 				perror("ERROR : Listen socket écoute.\n");
