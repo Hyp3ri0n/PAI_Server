@@ -16,8 +16,8 @@
                 <script type="text/javascript">
                     <![CDATA[
                         function openFacture(prenom, nom, actes) {
-                            var width  = 500;
-                            var height = 300;
+                            var width  = 1000;
+                            var height = 700;
                             if(window.innerWidth) {
                                 var left = (window.innerWidth-width)/2;
                                 var top = (window.innerHeight-height)/2;
@@ -45,20 +45,30 @@
         <xsl:variable name="nbPatients" select="count(//patient[visites/visite[@date=$dateJour and @intervenant=$destinedId]])"/>
         <header>
             <div class="panel perso">
-                <h1>
-                    Bonjour <xsl:value-of select="prenom"/>
-                </h1>
-                <h2>
-                    <xsl:if test="$nbPatients &gt; 1">
-                        Aujourd'hui vous avez <xsl:value-of select="$nbPatients"/> patient(s).
-                    </xsl:if>
-                    <xsl:if test="$nbPatients = 1">
-                        Aujourd'hui vous avez <xsl:value-of select="$nbPatients"/> patient.
-                    </xsl:if>
-                    <xsl:if test="$nbPatients = 0">
-                        Aujourd'hui vous n'avez pas de patient.
-                    </xsl:if>
-                </h2>
+                <div class="block">
+                    <div class="info">
+                        <h1>
+                            Bonjour <xsl:value-of select="prenom"/>
+                        </h1>
+                        <h2>
+                            <xsl:if test="$nbPatients &gt; 1">
+                                Aujourd'hui vous avez <xsl:value-of select="$nbPatients"/> patients.
+                            </xsl:if>
+                            <xsl:if test="$nbPatients = 1">
+                                Aujourd'hui vous avez <xsl:value-of select="$nbPatients"/> patient.
+                            </xsl:if>
+                            <xsl:if test="$nbPatients = 0">
+                                Aujourd'hui vous n'avez pas de patient.
+                            </xsl:if>
+                        </h2>
+                    </div>
+                    <div class="photo">
+                        <xsl:variable name="srcAvatar" select="photo"/>
+                        <img class="img">
+                            <xsl:attribute name="src">images/<xsl:value-of select="$srcAvatar"/></xsl:attribute>
+                        </img>
+                    </div>
+                </div>
             </div>
         </header>
         <section>
@@ -137,7 +147,7 @@
                 <div class="map left">
                     <h3>[WIP] Situation Géographique :</h3>
                     <div class="divMap">
-                        <img src="map.jpg"/>
+                        <img src="images/map.jpg"/>
                     </div>
                 </div>
             </div>

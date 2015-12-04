@@ -45,10 +45,12 @@ void client_readLine(int id_socket)
 /**
  * Fonction appelé par le serveur pour communiquer avec Google
  */
-int client()
+int client(char* idInf)
 {
 	char buffer_client[5000];
 	FILE* fichierXmlGoogle = NULL;
+
+	int infirmiere = atoi(idInf);
 	/********************************************************************/
 	/*																	*/
 	/*						GESTION DES SOCKETS							*/
@@ -94,7 +96,7 @@ int client()
 			/*char* debutGet = "GEThttp://maps.googleapis.com/maps/api/distancematrix/xml?sensor=false&mode=driving&unit=metric&";
 			char* finGet = " HTTP/1.1\r\nAccept: text/html, application/xhtml+xml,application/xml\r\nAccept-language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3-us";*/
 
-			char* req = r.getGoogleHttpRequest("../data/xmlRequest.xml", 001);
+			char* req = r.getGoogleHttpRequest("../data/xmlRequest.xml", infirmiere);
 
 			//Exemple pour test
 			char* bufferEnvoi = (char*)malloc(300 + strlen(req) + 1);
@@ -102,8 +104,7 @@ int client()
 			//bufferEnvoi = "GET http://maps.googleapis.com/maps/api/distancematrix/xml?sensor=false&mode=driving&unit=metric&origins=St%2BMartin%2Bd%5C%27H%C3%A8res%2B38400%2B60%2BRue%2Bde%2Bla%2Bchimie%7CGrenoble%2B38031%2B46%2BAvenue%2BFelix%2Bviallet%7CLa%2BTronche%2B38700%2BRond-Point%2Bde%2Bla%2BCroix%2Bde%2BVie%7C&destinations=St%2BMartin%2Bd%5C%27H%C3%A8res%2B38400%2B60%2BRue%2Bde%2Bla%2Bchimie%7CGrenoble%2B38031%2B46%2BAvenue%2BFelix%2Bviallet%7CLa%2BTronche%2B38700%2BRond-Point%2Bde%2Bla%2BCroix%2Bde%2BVie%7C\r\nHTTP/1.1\r\nAccept: text/html,application/xhtml+xml,application/xml\nAccept-Language: fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3-us";
 			printf("\n\nINFO : requete (obtenue par fonction getGoogleHttpRequest) ->\n\n%s\n\nINFO : requete à envoyer à Google ->\n\n%s\n\n", req, bufferEnvoi);
 
-			// Partie non fonctionnelle
-			//
+
 			printf("ID SOCKET : %i\n", id_socket_client_emmet);
 			printf("BUUFER : %s\n", bufferEnvoi);
 			printf("SIZE : %i\n", strlen(bufferEnvoi));
@@ -133,7 +134,7 @@ int client()
 
 			//TODO : Verifications
 			SortVisits triVisites;
-			triVisites.processDistanceMatrix("../data/xmlRequest.xml","../data/reponseGoogle.xml", 1, "../data/cabinet.xslt", "../data/cabinet.html");
+			triVisites.processDistanceMatrix("../data/xmlRequest.xml","../data/reponseGoogle.xml", infirmiere, "../data/cabinet.xslt", "../data/cabinet.html");
 		}
 		else
 			perror("ERROR : Connect socket d'émission.\n");

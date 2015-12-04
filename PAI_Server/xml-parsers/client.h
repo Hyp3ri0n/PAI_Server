@@ -28,6 +28,6 @@
 #include "SortVisits.h"
 
 void client_readLine(int id_socket);
-int client();
+int client(char* idInf);
 
 #endif /* XML_PARSERS_CLIENT_H_ */

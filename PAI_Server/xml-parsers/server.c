@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 	/** int nbMaxCo : Entier qui défini le nombre maximal de connections clients simultanées sur la même socket **/
 	int nbMaxCo = 10;
 	/** int id_socket_server_listen : Entier qui défini l'identifiant de la socket d'écoute **/
-	int id_socket_server_listen = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	int id_socket_server_listen = socket(AF_INET, SOCK_STREAM, 0);
 
 
 	if (id_socket_server_listen != -1)
@@ -195,6 +195,8 @@ int main(int argc, char *argv[])
 
 					FILE* fichierXmlSave = NULL;
 					FILE* fichierHTMLSave = NULL;
+					char charHtml;
+					char* bufferHtml = (char*)malloc(8192);;
 
 					//Création du fils
 					pid = fork();
@@ -206,9 +208,6 @@ int main(int argc, char *argv[])
 							case 0:
 								/* PROCESSUS FILS */
 								printf("INFO : Processus fils -> lire les donées qui transitent (pid = %d).\n", getpid());
-
-								//Ferme la socket d'écoute
-								close(id_socket_server_listen);
 
 								fichierXmlSave = fopen("../data/xmlRequest.xml","w");
 								if(fichierXmlSave == NULL)
@@ -266,7 +265,7 @@ int main(int argc, char *argv[])
 								free(xmlContent);
 
 								// appel du client pour requete Google
-								client();
+								client(id_infirmiere);
 
 								//TODO ENvoi du contenu du fichier HTML au server NODEJS avec la socket de service
 								fichierHTMLSave = fopen("../data/cabinet.html","r");
@@ -277,12 +276,35 @@ int main(int argc, char *argv[])
 								else
 								{
 									printf("INFO : Fichier ouvert (HTML)\n");
+
+									//Envoi du contenu HTML au NodeJS
+									i  = 0;
+									while((charHtml = (char)fgetc(fichierHTMLSave)) != EOF)
+									{
+										bufferHtml[i] = charHtml;
+										i++;
+									}
+
+									printf("INFO : GET : \n%s (HTML)\n", bufferHtml);
+									printf("INFO : SIZE : %i (HTML)\n", sizeof(bufferHtml));
+									printf("INFO : STRLEN : %i (HTML)\n", (int)strlen(bufferHtml));
+									printf("INFO : ID SOCKET : %i\n", id_socket_server_listen);
+
+									write(id_socket_server_service, bufferHtml, strlen(bufferHtml));
+
+									printf("INFO : Envoyé\n");
+
 								}
 
-								while(len_file <)
+								fclose(fichierHTMLSave);
+								printf("INFO : Fichier fermé (HTML)\n");
 
+								//free buffer
+								free(bufferHtml);
 								//Ferme la socket d'écoute
 								close(id_socket_server_service);
+								//Ferme la socket d'écoute
+								close(id_socket_server_listen);
 
 								exit(0); /* fin du processus fils */
 								break;
@@ -292,6 +314,7 @@ int main(int argc, char *argv[])
 								//Ferme la socket de service
 								close(id_socket_server_service);
 								printf("INFO : Processus père -> retourne dans \"accept\" (pid=%d)\n", pid);
+
 								break;
 						}
 					}
