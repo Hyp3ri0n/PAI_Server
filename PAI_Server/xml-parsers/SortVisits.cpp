@@ -64,8 +64,9 @@ std::string SortVisits::getPatientNodeAdresse(xmlpp::Node * adresseNode) {
     // On déclare le namespace uilisé dans le fichier source.
     // Attention, ce namespace doit être le même que celui de votre fichier cabinetInfirmier.xml !!    
     xmlpp::Node::PrefixNsMap nsMap;
-    nsMap["cab"] = "http://www.ujf-grenoble.fr/l3miage/medical";
-     
+    //nsMap["cab"] = "http://www.ujf-grenoble.fr/l3miage/medical";
+    nsMap["cab"] = "http://www.ujf-grenoble.fr/cabinet";
+
     // On récupère le numéro s'il existe
     if (adresseNode->find("cab:numéro", nsMap).size() > 0) {
         node = adresseNode->find("cab:numéro", nsMap).at(0);
@@ -139,8 +140,9 @@ void SortVisits::modifyFile(const char * inputFilename, std::vector<std::string>
         // On déclare donc le namespace uilisé dans le fichier source.
         // Attention, ce namespace doit être le même que celui de votre fichier cabinetInfirmier.xml !!    
         xmlpp::Node::PrefixNsMap nsMap;
-        nsMap["cab"] = "http://www.ujf-grenoble.fr/l3miage/medical";
- 
+        //nsMap["cab"] = "http://www.ujf-grenoble.fr/l3miage/medical";
+        nsMap["cab"] = "http://www.ujf-grenoble.fr/cabinet";
+
         // --------------- On ordonne les patients selon leur adresse
         // On recherche et stocke tous les patients dans une map avec pour
         // clé leur adresse

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?> 
+<?xml version="1.0" encoding="UTF-8"?>
 
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
                 xmlns:java="http://xml.apache.org/xslt/java"
@@ -12,6 +12,7 @@
         <html>
             <head>
                 <title>PAI - Page Infirmière</title>
+                <script type="text/javascript" src="js/facture.js"></script>
                 <script type="text/javascript">
                     <![CDATA[
                         function openFacture(prenom, nom, actes) {
@@ -26,12 +27,13 @@
                                 var top = (document.body.clientHeight-height)/2;
                             }
                             var factureWindow = window.open('','facture','menubar=yes, scrollbars=yes, top='+top+', left='+left+', width='+width+', height='+height+'');
-                            factureText = "Facture pour : " + prenom + " " + nom;
+                            
+                            factureText = afficherFacture(prenom, nom, actes);
                             factureWindow.document.write(factureText);
                          } 
                     ]]>
                 </script>
-                <link rel="stylesheet" type="text/css" href="Style.css"/>
+                <link rel="stylesheet" type="text/css" href="css/Style.css"/>
             </head>
             <body>
                 <xsl:apply-templates select="//infirmier[@id=$destinedId]"/>
@@ -43,30 +45,20 @@
         <xsl:variable name="nbPatients" select="count(//patient[visites/visite[@date=$dateJour and @intervenant=$destinedId]])"/>
         <header>
             <div class="panel perso">
-                <div class="block">
-                    <div class="info">
-                        <h1>
-                            Bonjour <xsl:value-of select="prenom"/>
-                        </h1>
-                        <h2>
-                            <xsl:if test="$nbPatients &gt; 1">
-                                Aujourd'hui vous avez <xsl:value-of select="$nbPatients"/> patients.
-                            </xsl:if>
-                            <xsl:if test="$nbPatients = 1">
-                                Aujourd'hui vous avez <xsl:value-of select="$nbPatients"/> patient.
-                            </xsl:if>
-                            <xsl:if test="$nbPatients = 0">
-                                Aujourd'hui vous n'avez pas de patient.
-                            </xsl:if>
-                        </h2>
-                    </div>
-                    <div class="photo">
-                        <xsl:variable name="srcAvatar" select="photo"/>
-                        <img class="img">
-                            <xsl:attribute name="src"><xsl:value-of select="$srcAvatar"/></xsl:attribute>
-                        </img>
-                    </div>
-                </div>
+                <h1>
+                    Bonjour <xsl:value-of select="prenom"/>
+                </h1>
+                <h2>
+                    <xsl:if test="$nbPatients &gt; 1">
+                        Aujourd'hui vous avez <xsl:value-of select="$nbPatients"/> patient(s).
+                    </xsl:if>
+                    <xsl:if test="$nbPatients = 1">
+                        Aujourd'hui vous avez <xsl:value-of select="$nbPatients"/> patient.
+                    </xsl:if>
+                    <xsl:if test="$nbPatients = 0">
+                        Aujourd'hui vous n'avez pas de patient.
+                    </xsl:if>
+                </h2>
             </div>
         </header>
         <section>
@@ -154,9 +146,11 @@
             <center>
                 <input type="button" value="Facture">
                     <xsl:attribute name="onclick">
-                        openFacture('<xsl:value-of select="nom"/>',
-                        '<xsl:value-of select="prenom"/>',
-                        '<xsl:value-of select="visites/visite/acte"/>')
+                        openFacture('<xsl:value-of select="prenom"/>',
+                        '<xsl:value-of select="nom"/>',
+                        '<xsl:for-each select="visites/visite/acte/@id">
+                            <xsl:value-of select="concat(current(),' ')"/>
+                        </xsl:for-each>')
                     </xsl:attribute>
                 </input>
             </center>

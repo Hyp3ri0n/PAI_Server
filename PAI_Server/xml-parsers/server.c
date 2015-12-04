@@ -194,6 +194,7 @@ int main(int argc, char *argv[])
 					int i; // itération boucle
 
 					FILE* fichierXmlSave = NULL;
+					FILE* fichierHTMLSave = NULL;
 
 					//Création du fils
 					pid = fork();
@@ -268,7 +269,17 @@ int main(int argc, char *argv[])
 								client();
 
 								//TODO ENvoi du contenu du fichier HTML au server NODEJS avec la socket de service
+								fichierHTMLSave = fopen("../data/cabinet.html","r");
+								if(fichierHTMLSave == NULL)
+								{
+									printf("ERROR : Impossible d'ouvrir le fichier (HTML)\n");
+								}
+								else
+								{
+									printf("INFO : Fichier ouvert (HTML)\n");
+								}
 
+								while(len_file <)
 
 								//Ferme la socket d'écoute
 								close(id_socket_server_service);
