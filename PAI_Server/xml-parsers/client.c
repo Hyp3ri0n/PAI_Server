@@ -133,7 +133,7 @@ int client()
 
 			//TODO : Verifications
 			SortVisits triVisites;
-			triVisites.processDistanceMatrix("../data/cabinet.xml","../data/reponseGoogle.xml", 1, "../data/cabinet.xslt", "../data/cabinet.html");
+			triVisites.processDistanceMatrix("../data/xmlRequest.xml","../data/reponseGoogle.xml", 1, "../data/cabinet.xslt", "../data/cabinet.html");
 		}
 		else
 			perror("ERROR : Connect socket d'émission.\n");
